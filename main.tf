@@ -5,7 +5,6 @@ data "sops_file" "secret_vars" {
 locals {
   github_repositories = toset([
     ".github",
-    "aap-libvirt-infra",
     "ansible-project-libvirt",
     "ansible-site-cluster",
     "ansible-role-crc",
@@ -14,7 +13,6 @@ locals {
     "gitops-cluster",
     "images",
     "shared-workflows",
-    "terraform-cloudflare-infra",
     "terraform-libvirt-infra",
     "terraform-libvirt-domain",
     "tfroot-aws",
@@ -122,11 +120,9 @@ locals {
       name  = "SOPS_AGE_KEY"
       value = data.sops_file.secret_vars.data["sops_age_key"]
       repositories = [
-        "aap-libvirt-infra",
         "ansible-project-libvirt",
         "ansible-site-cluster",
         "tfroot-aws",
-        "terraform-cloudflare-infra",
         "tfroot-cloudflare",
         "tfroot-github",
         "terraform-libvirt-infra",
