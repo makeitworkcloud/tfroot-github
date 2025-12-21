@@ -67,6 +67,7 @@ locals {
       repositories = [
         "ansible-site-cluster",
         "images",
+        "kustomize-cluster",
         "tfroot-github"
       ]
     }
@@ -76,6 +77,7 @@ locals {
       repositories = [
         "ansible-site-cluster",
         "images",
+        "kustomize-cluster",
         "tfroot-github"
       ]
     }
@@ -85,6 +87,7 @@ locals {
       repositories = [
         "ansible-site-cluster",
         "images",
+        "kustomize-cluster",
         "tfroot-github"
       ]
     }
@@ -94,6 +97,7 @@ locals {
       repositories = [
         "ansible-site-cluster",
         "images",
+        "kustomize-cluster",
         "tfroot-github"
       ]
     }
@@ -103,6 +107,7 @@ locals {
       repositories = [
         "ansible-site-cluster",
         "images",
+        "kustomize-cluster",
         "tfroot-github"
       ]
     }
