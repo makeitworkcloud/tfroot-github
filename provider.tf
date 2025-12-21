@@ -23,4 +23,3 @@ provider "github" {
   token = data.sops_file.secret_vars.data["github_token"]
   owner = data.sops_file.secret_vars.data["github_owner"]
 }
-

@@ -76,4 +76,3 @@ pre-commit-install-hooks: .git/hooks/pre-commit
 
 .git/hooks/pre-commit: pre-commit-check-deps
 	@pre-commit install --install-hooks
-
