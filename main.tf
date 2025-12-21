@@ -8,6 +8,7 @@ locals {
     "ansible-project-libvirt",
     "ansible-site-cluster",
     "ansible-role-crc",
+    "ansible-role-cftunnel",
     "cflan",
     "kustomize-cluster",
     "images",
