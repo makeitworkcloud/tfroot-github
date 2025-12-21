@@ -1,0 +1,106 @@
+name: OpenTofu Tests, Plan & Apply
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+env:
+  SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
+
+jobs:
+  test:
+    name: Pre-commit Tests
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/makeitworkcloud/runner:latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Initialize OpenTofu
+        run: tofu init -backend=false
+
+      - name: Run tests
+        run: make test
+
+      - name: Show README.md changes after pre-commit
+        run: |
+          echo "=== Git status after pre-commit ==="
+          git status --porcelain
+          echo "=== Git diff after pre-commit ==="
+          git diff HEAD
+          echo "=== README.md content after pre-commit ==="
+          cat README.md | head -50
+
+  plan:
+    name: OpenTofu Plan
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/makeitworkcloud/runner:latest
+    if: github.event_name == 'pull_request'
+    needs: [test]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: OpenTofu Plan
+        id: plan
+        run: |
+          # Run make plan - Makefile will handle writing plan to file
+          make plan || true
+
+          # Extract only the plan summary - what will actually change
+          # Start from "OpenTofu will perform" and take everything after
+          sed -n '/OpenTofu will perform the following actions:/,$p' plan-output.txt > plan-filtered.txt
+
+          # If no changes, look for "No changes" message
+          if [ ! -s plan-filtered.txt ]; then
+            grep -A 2 "No changes" plan-output.txt > plan-filtered.txt || echo "No plan output found" > plan-filtered.txt
+          fi
+
+          # Limit output to last 1000 lines to prevent "Argument list too long" error
+          # The plan summary with actual changes is at the end, that's what matters
+          tail -n 1000 plan-filtered.txt > plan-filtered-truncated.txt
+          mv plan-filtered-truncated.txt plan-filtered.txt
+
+      - name: Comment PR with Plan
+        uses: actions/github-script@v7
+        if: github.event_name == 'pull_request'
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const planOutput = fs.readFileSync('plan-filtered.txt', 'utf8');
+
+            const output = `#### OpenTofu Plan 📋
+            \`\`\`
+            ${planOutput}
+            \`\`\`
+            `;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            });
+
+  apply:
+    name: OpenTofu Apply
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/makeitworkcloud/runner:latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [test]
+    environment: production
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: OpenTofu Apply
+        run: make apply

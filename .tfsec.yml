@@ -1,0 +1,5 @@
+---
+min_required_version: 1.28.1
+minimum_severity: LOW
+severity_overrides: {}
+exclude: []
