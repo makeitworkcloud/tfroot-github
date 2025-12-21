@@ -13,6 +13,7 @@ locals {
     "cflan",
     "gitops-cluster",
     "images",
+    "shared-workflows",
     "terraform-aws-infra",
     "terraform-cloudflare-infra",
     "terraform-libvirt-infra",
