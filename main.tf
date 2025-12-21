@@ -9,7 +9,7 @@ locals {
     "ansible-site-cluster",
     "ansible-role-crc",
     "cflan",
-    "gitops-cluster",
+    "kustomize-cluster",
     "images",
     "shared-workflows",
     "terraform-libvirt-infra",
