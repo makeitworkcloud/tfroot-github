@@ -42,8 +42,8 @@ init: clean .terraform/terraform.tfstate
 plan: init .terraform/plan
 
 .terraform/plan:
-	@${TERRAFORM} plan -compact-warnings -out tfplan.bin
-	@${TERRAFORM} show tfplan.bin | tee plan-output.txt
+	@${TERRAFORM} plan -compact-warnings -no-color -out tfplan.bin
+	@${TERRAFORM} show -no-color tfplan.bin | tee plan-output.txt
 	@rm -f tfplan.bin
 
 apply: init .terraform/apply
