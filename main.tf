@@ -8,7 +8,6 @@ locals {
     "ansible-project-libvirt",
     "ansible-site-cluster",
     "ansible-role-crc",
-    "ansible-role-ksops",
     "cflan",
     "gitops-cluster",
     "images",
