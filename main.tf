@@ -13,7 +13,6 @@ locals {
     "kustomize-cluster",
     "images",
     "shared-workflows",
-    "terraform-libvirt-infra",
     "terraform-libvirt-domain",
     "tfroot-aws",
     "tfroot-cloudflare",
@@ -130,7 +129,6 @@ locals {
         "tfroot-aws",
         "tfroot-cloudflare",
         "tfroot-github",
-        "terraform-libvirt-infra",
         "tfroot-libvirt"
       ]
     }
@@ -139,7 +137,6 @@ locals {
       value = data.sops_file.secret_vars.data["ssh_private_key"]
       repositories = [
         "ansible-site-cluster",
-        "terraform-libvirt-infra",
         "tfroot-libvirt"
       ]
     }
@@ -148,7 +145,6 @@ locals {
       value = data.sops_file.secret_vars.data["ssh_known_hosts"]
       repositories = [
         "ansible-site-cluster",
-        "terraform-libvirt-infra",
         "tfroot-libvirt"
       ]
     }
