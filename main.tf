@@ -97,14 +97,9 @@ locals {
         "kustomize-cluster"
       ]
     }
-    "openshift_token" = {
-      name  = "OPENSHIFT_TOKEN"
-      value = data.sops_file.secret_vars.data["openshift_token"]
-      repositories = [
-        "images",
-        "kustomize-cluster"
-      ]
-    }
+    # NOTE: OPENSHIFT_TOKEN is managed by ArgoCD PostSync job (ci-token-sync)
+    # in kustomize-cluster, not Terraform. This allows automatic token refresh
+    # when the cluster is recreated.
     "sops_age_key" = {
       name  = "SOPS_AGE_KEY"
       value = data.sops_file.secret_vars.data["sops_age_key"]
