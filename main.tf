@@ -101,22 +101,13 @@ locals {
         "tfroot-github"
       ]
     }
-    "openshift_password" = {
-      name  = "OPENSHIFT_PASSWORD"
-      value = data.sops_file.secret_vars.data["openshift_password"]
-      repositories = [
-        "ansible-site-cluster",
-        "images",
-        "kustomize-cluster",
-        "tfroot-github"
-      ]
-    }
     "openshift_token" = {
       name  = "OPENSHIFT_TOKEN"
       value = data.sops_file.secret_vars.data["openshift_token"]
       repositories = [
         "ansible-site-cluster",
         "images",
+        "kustomize-cluster",
         "tfroot-github"
       ]
     }
