@@ -85,30 +85,24 @@ locals {
       name  = "OPENSHIFT_SERVER_URL"
       value = data.sops_file.secret_vars.data["openshift_server_url"]
       repositories = [
-        "ansible-site-cluster",
         "images",
-        "kustomize-cluster",
-        "tfroot-github"
+        "kustomize-cluster"
       ]
     }
     "openshift_username" = {
       name  = "OPENSHIFT_USERNAME"
       value = data.sops_file.secret_vars.data["openshift_username"]
       repositories = [
-        "ansible-site-cluster",
         "images",
-        "kustomize-cluster",
-        "tfroot-github"
+        "kustomize-cluster"
       ]
     }
     "openshift_token" = {
       name  = "OPENSHIFT_TOKEN"
       value = data.sops_file.secret_vars.data["openshift_token"]
       repositories = [
-        "ansible-site-cluster",
         "images",
-        "kustomize-cluster",
-        "tfroot-github"
+        "kustomize-cluster"
       ]
     }
     "sops_age_key" = {
