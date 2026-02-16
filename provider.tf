@@ -12,7 +12,8 @@ terraform {
       source = "carlpett/sops"
     }
     github = {
-      source = "integrations/github"
+      source  = "integrations/github"
+      version = "~> 6.0"
     }
   }
 }
