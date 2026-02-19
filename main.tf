@@ -60,6 +60,16 @@ locals {
       value        = data.sops_file.secret_vars.data["www_aws_secret_access_key"]
       repositories = ["www"]
     }
+    "cloudflare_zone_id" = {
+      name         = "CLOUDFLARE_ZONE_ID"
+      value        = data.sops_file.secret_vars.data["cloudflare_zone_id"]
+      repositories = ["www"]
+    }
+    "cloudflare_api_token" = {
+      name         = "CLOUDFLARE_API_TOKEN"
+      value        = data.sops_file.secret_vars.data["cloudflare_api_token"]
+      repositories = ["www"]
+    }
     "cloudflare_auth_client_id" = {
       name  = "CLOUDFLARE_AUTH_CLIENT_ID"
       value = data.sops_file.secret_vars.data["cloudflare_auth_client_id"]
