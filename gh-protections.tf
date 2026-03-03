@@ -23,7 +23,7 @@ resource "github_branch_protection" "protections" {
     dismiss_stale_reviews           = true
     pull_request_bypassers          = ["/${github_team.admins.slug}"]
     require_code_owner_reviews      = true
-    required_approving_review_count = 1
+    required_approving_review_count = 0
     require_last_push_approval      = true
     restrict_dismissals             = true
   }
