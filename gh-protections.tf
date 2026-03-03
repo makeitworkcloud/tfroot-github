@@ -11,7 +11,7 @@ resource "github_branch_protection" "protections" {
   repository_id                   = github_repository.repositories[each.key].node_id
   pattern                         = "main"
   enforce_admins                  = false
-  allows_force_pushes             = true
+  allows_force_pushes             = false
   required_linear_history         = true
   require_conversation_resolution = true
   required_status_checks {
