@@ -7,7 +7,7 @@ import {
 */
 
 resource "github_branch_protection" "protections" {
-  for_each                        = local.github_repositories
+  for_each                        = local.active_github_repositories
   repository_id                   = github_repository.repositories[each.key].node_id
   pattern                         = "main"
   enforce_admins                  = false

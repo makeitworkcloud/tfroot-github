@@ -6,7 +6,7 @@ locals {
         name       = secret.name
         value      = secret.value
         repository = repo
-      }
+      } if contains(local.active_github_repositories, repo)
     ]
   ])
 }
