@@ -19,6 +19,11 @@ locals {
     "tfroot-libvirt",
     "www"
   ])
+  archived_github_repositories = toset([
+    "ansible-project-libvirt",
+    "ansible-site-cluster",
+    "ansible-role-crc"
+  ])
   secrets = {
     "onion_s3_bucket" = {
       name         = "ONION_AWS_S3_BUCKET"
@@ -74,7 +79,6 @@ locals {
       name  = "CLOUDFLARE_AUTH_CLIENT_ID"
       value = data.sops_file.secret_vars.data["cloudflare_auth_client_id"]
       repositories = [
-        "ansible-site-cluster",
         "images",
         "kustomize-cluster",
         "tfroot-github"
@@ -84,7 +88,6 @@ locals {
       name  = "CLOUDFLARE_AUTH_CLIENT_SECRET"
       value = data.sops_file.secret_vars.data["cloudflare_auth_client_secret"]
       repositories = [
-        "ansible-site-cluster",
         "images",
         "kustomize-cluster",
         "tfroot-github"
@@ -113,8 +116,6 @@ locals {
       name  = "SOPS_AGE_KEY"
       value = data.sops_file.secret_vars.data["sops_age_key"]
       repositories = [
-        "ansible-project-libvirt",
-        "ansible-site-cluster",
         "tfroot-aws",
         "tfroot-cloudflare",
         "tfroot-github",
@@ -125,7 +126,6 @@ locals {
       name  = "SSH_PRIVATE_KEY"
       value = data.sops_file.secret_vars.data["ssh_private_key"]
       repositories = [
-        "ansible-site-cluster",
         "tfroot-libvirt"
       ]
     }
@@ -133,22 +133,7 @@ locals {
       name  = "SSH_KNOWN_HOSTS"
       value = data.sops_file.secret_vars.data["ssh_known_hosts"]
       repositories = [
-        "ansible-site-cluster",
         "tfroot-libvirt"
-      ]
-    }
-    "ssh_user" = {
-      name  = "SSH_USER"
-      value = data.sops_file.secret_vars.data["ssh_user"]
-      repositories = [
-        "ansible-site-cluster"
-      ]
-    }
-    "ssh_host" = {
-      name  = "SSH_HOST"
-      value = data.sops_file.secret_vars.data["ssh_host"]
-      repositories = [
-        "ansible-site-cluster"
       ]
     }
   }

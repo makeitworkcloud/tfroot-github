@@ -9,6 +9,7 @@ import {
 resource "github_repository" "repositories" {
   for_each                    = local.github_repositories
   name                        = each.key
+  archived                    = contains(local.archived_github_repositories, each.key)
   visibility                  = var.github_visibility
   allow_squash_merge          = true
   allow_merge_commit          = true
