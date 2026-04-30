@@ -20,9 +20,10 @@ locals {
     "www"
   ])
   archived_github_repositories = toset([
-    for repo in local.github_repositories : repo if startswith(repo, "ansible-")
+    "ansible-project-libvirt",
+    "ansible-site-cluster",
+    "ansible-role-crc"
   ])
-  active_github_repositories = setsubtract(local.github_repositories, local.archived_github_repositories)
   secrets = {
     "onion_s3_bucket" = {
       name         = "ONION_AWS_S3_BUCKET"
