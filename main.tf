@@ -136,15 +136,5 @@ locals {
         "tfroot-libvirt"
       ]
     }
-    "ssh_user" = {
-      name         = "SSH_USER"
-      value        = data.sops_file.secret_vars.data["ssh_user"]
-      repositories = []
-    }
-    "ssh_host" = {
-      name         = "SSH_HOST"
-      value        = data.sops_file.secret_vars.data["ssh_host"]
-      repositories = []
-    }
   }
 }
