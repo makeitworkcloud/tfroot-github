@@ -19,9 +19,9 @@ resource "github_branch_protection" "protections" {
     contexts = []
   }
   required_pull_request_reviews {
-    dismissal_restrictions          = ["/${github_team.admins.slug}"]
+    dismissal_restrictions          = ["${var.github_owner}/${github_team.admins.slug}"]
     dismiss_stale_reviews           = true
-    pull_request_bypassers          = ["/${github_team.admins.slug}"]
+    pull_request_bypassers          = ["${var.github_owner}/${github_team.admins.slug}"]
     require_code_owner_reviews      = true
     required_approving_review_count = 0
     require_last_push_approval      = true
@@ -29,7 +29,7 @@ resource "github_branch_protection" "protections" {
   }
   restrict_pushes {
     push_allowances = [
-      "/${github_team.admins.slug}"
+      "${var.github_owner}/${github_team.admins.slug}"
     ]
   }
   depends_on = [github_repository.repositories, github_team.admins]
