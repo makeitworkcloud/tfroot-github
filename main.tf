@@ -93,25 +93,6 @@ locals {
         "tfroot-github"
       ]
     }
-    "openshift_server_url" = {
-      name  = "OPENSHIFT_SERVER_URL"
-      value = data.sops_file.secret_vars.data["openshift_server_url"]
-      repositories = [
-        "images",
-        "kustomize-cluster"
-      ]
-    }
-    "openshift_username" = {
-      name  = "OPENSHIFT_USERNAME"
-      value = data.sops_file.secret_vars.data["openshift_username"]
-      repositories = [
-        "images",
-        "kustomize-cluster"
-      ]
-    }
-    # NOTE: OPENSHIFT_TOKEN is managed by ArgoCD PostSync job (ci-token-sync)
-    # in kustomize-cluster, not Terraform. This allows automatic token refresh
-    # when the cluster is recreated.
     "sops_age_key" = {
       name  = "SOPS_AGE_KEY"
       value = data.sops_file.secret_vars.data["sops_age_key"]
