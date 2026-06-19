@@ -93,16 +93,6 @@ locals {
         "tfroot-github"
       ]
     }
-    "sops_age_key" = {
-      name  = "SOPS_AGE_KEY"
-      value = data.sops_file.secret_vars.data["sops_age_key"]
-      repositories = [
-        "tfroot-aws",
-        "tfroot-cloudflare",
-        "tfroot-github",
-        "tfroot-libvirt"
-      ]
-    }
     "ssh_private_key" = {
       name  = "SSH_PRIVATE_KEY"
       value = data.sops_file.secret_vars.data["ssh_private_key"]

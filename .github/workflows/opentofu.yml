@@ -10,10 +10,9 @@ on:
 
 permissions:
   contents: read
+  id-token: write
   pull-requests: write
 
 jobs:
   opentofu:
     uses: makeitworkcloud/shared-workflows/.github/workflows/opentofu.yml@main
-    secrets:
-      SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
