@@ -4,9 +4,12 @@
 
 OpenTofu root module for GitHub organization infrastructure.
 
-## Push Access
+## Git Workflow
 
-Agents are authorized to push directly to `main` in this repository.
+Use a feature branch and open a pull request rather than pushing directly to
+`main`. A push to `main` can invoke `apply` after tests pass and configured
+environment gates approve it. Do not push any branch unless explicitly
+requested.
 
 ## Pre-commit Configuration
 
@@ -23,7 +26,9 @@ This automatically fetches the canonical config if not present.
 
 ## CI/CD
 
-This repo uses the shared `opentofu.yml` workflow from `shared-workflows`. It runs on `ubuntu-latest` with the `tfroot-runner` container from GHCR.
+This repo uses the shared `opentofu.yml` workflow from `shared-workflows`. Jobs
+run natively on `arc-tf`; the runner pod already uses the `tfroot-runner` image,
+so the workflow does not start a nested container.
 
 ### Failure Modes
 
