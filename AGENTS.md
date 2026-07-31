@@ -13,30 +13,34 @@ requested.
 
 ## Pre-commit Configuration
 
-Pre-commit configuration is **centralized** in `makeitworkcloud/images/tfroot-runner/pre-commit-config.yaml`. The CI workflow fetches this config at runtime.
-
-**Do not** create or modify `.pre-commit-config.yaml` in this repository.
+Pre-commit configuration is centralized at
+`https://raw.githubusercontent.com/makeitworkcloud/images/main/tfroot-runner/pre-commit-config.yaml`. The root
+`.pre-commit-config.yaml` is generated and ignored; do not edit it.
 
 For local development, run:
 ```bash
 make test
 ```
 
-This automatically fetches the canonical config if not present.
+This refreshes the generated config from the canonical source on every run and
+replaces it only when the content changed.
 
 ## CI/CD
 
 This repo uses the shared `opentofu.yml` workflow from `shared-workflows`. Jobs
 run natively on `arc-tf`; the runner pod already uses the `tfroot-runner` image,
-so the workflow does not start a nested container.
+so the workflow does not start a nested container. The shared workflow fetches
+the canonical pre-commit config at runtime; this repository does not provide a
+tracked copy.
 
 ### Failure Modes
 
 **"manifest unknown" error:** The `tfroot-runner:latest` image doesn't exist in GHCR. Check if the `images` repo Build workflow succeeded.
 
-**Pre-commit failures:** If hooks fail unexpectedly, the canonical config may have changed. Delete `.pre-commit-config.yaml` locally and re-run `make test` to fetch the latest.
+**Pre-commit failures:** If hooks fail unexpectedly, the canonical config may
+have changed. Re-run `make test` to refresh it and run the checks.
 
 ## Related Repositories
 
 - `images` - Contains tfroot-runner image and canonical pre-commit config
-- `shared-workflows` - Contains the reusable OpenTofu workflow and canonical pre-commit config
+- `shared-workflows` - Contains the reusable OpenTofu workflow
