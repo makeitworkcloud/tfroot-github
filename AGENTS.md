@@ -44,3 +44,12 @@ have changed. Re-run `make test` to refresh it and run the checks.
 
 - `images` - Contains tfroot-runner image and canonical pre-commit config
 - `shared-workflows` - Contains the reusable OpenTofu workflow
+
+## Import ID Formats
+
+Use the provider's resource-specific ID format when adopting existing GitHub
+objects:
+
+- repositories: `<repository>`
+- `main` branch protections: `<repository>:main`
+- Actions secrets: `<repository>/<secret-name>`
