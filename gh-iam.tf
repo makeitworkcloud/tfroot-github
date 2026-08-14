@@ -3,7 +3,6 @@ resource "github_membership" "admin" {
   role     = "admin"
 }
 
-# Teams for ArgoCD RBAC integration
 resource "github_team" "admins" {
   name        = "admins"
   description = "ArgoCD administrators"
@@ -16,7 +15,6 @@ resource "github_team" "developers" {
   privacy     = "closed"
 }
 
-# Team memberships
 resource "github_team_membership" "admins_xnoto" {
   team_id  = github_team.admins.id
   username = "xnoto"

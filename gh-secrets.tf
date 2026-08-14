@@ -11,14 +11,6 @@ locals {
   ])
 }
 
-/*
-import {
-  for_each = { for pair in local.secret_repo_pairs : "${pair.repository}_${pair.name}" => pair }
-  to       = github_actions_secret.secrets["${each.value.repository}_${each.value.name}"]
-  id       = "${each.value.repository}/${each.value.name}"
-}
-*/
-
 resource "github_actions_secret" "secrets" {
   for_each        = { for pair in local.secret_repo_pairs : "${pair.repository}_${pair.name}" => pair }
   repository      = each.value.repository
