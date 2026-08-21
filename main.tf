@@ -24,6 +24,12 @@ locals {
     "ansible-site-cluster",
     "ansible-role-crc"
   ])
+  # Non-archived repositories. Secrets cannot be written to archived repos,
+  # so org-wide secrets must target this list rather than github_repositories.
+  active_github_repositories = toset([
+    for repo in local.github_repositories : repo
+    if !contains(local.archived_github_repositories, repo)
+  ])
   secrets = {
     "onion_s3_bucket" = {
       name         = "ONION_AWS_S3_BUCKET"
@@ -76,22 +82,21 @@ locals {
       repositories = ["www"]
     }
     "cloudflare_auth_client_id" = {
-      name  = "CLOUDFLARE_AUTH_CLIENT_ID"
-      value = data.sops_file.secret_vars.data["cloudflare_auth_client_id"]
-      repositories = [
-        "images",
-        "kustomize-cluster",
-        "tfroot-github"
-      ]
+      name         = "CLOUDFLARE_AUTH_CLIENT_ID"
+      value        = data.sops_file.secret_vars.data["cloudflare_auth_client_id"]
+      repositories = local.active_github_repositories
     }
     "cloudflare_auth_client_secret" = {
-      name  = "CLOUDFLARE_AUTH_CLIENT_SECRET"
-      value = data.sops_file.secret_vars.data["cloudflare_auth_client_secret"]
-      repositories = [
-        "images",
-        "kustomize-cluster",
-        "tfroot-github"
-      ]
+      name         = "CLOUDFLARE_AUTH_CLIENT_SECRET"
+      value        = data.sops_file.secret_vars.data["cloudflare_auth_client_secret"]
+      repositories = local.active_github_repositories
+    }
+    "grafana_alerts_token" = {
+      name = "GRAFANA_ALERTS_TOKEN"
+      # Placeholder until the operator-generated token is copied from the
+      # cluster (see AGENTS.md, "Dependabot PR Alerting").
+      value        = lookup(data.sops_file.secret_vars.data, "grafana_alerts_token", "pending-grafana-service-account-token")
+      repositories = local.active_github_repositories
     }
     "ssh_private_key" = {
       name  = "SSH_PRIVATE_KEY"
