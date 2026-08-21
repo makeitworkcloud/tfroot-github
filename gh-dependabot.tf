@@ -2,6 +2,10 @@
 # repository receives the same `.github/dependabot.yml` policy. Do not add
 # hand-maintained dependabot configs to downstream repositories.
 #
+# OpenTofu roots use the dedicated `opentofu` ecosystem (GA since 2025-12-16),
+# not `terraform`. Lock files are not git-tracked in these repos, so only
+# version constraints in .tf files are bumped.
+#
 # Deliberately not covered:
 # - pre-commit hook revisions: owned by images/tfroot-runner/pre-commit-config.yaml
 # - tool ARG pins in images/*/Containerfile: Dependabot only updates FROM tags
@@ -14,11 +18,11 @@ locals {
     "images"                   = ["github-actions", "docker"]
     "kustomize-cluster"        = ["github-actions"]
     "shared-workflows"         = ["github-actions"]
-    "terraform-libvirt-domain" = ["github-actions", "terraform"]
-    "tfroot-aws"               = ["github-actions", "terraform"]
-    "tfroot-cloudflare"        = ["github-actions", "terraform"]
-    "tfroot-github"            = ["github-actions", "terraform"]
-    "tfroot-libvirt"           = ["github-actions", "terraform"]
+    "terraform-libvirt-domain" = ["github-actions", "opentofu"]
+    "tfroot-aws"               = ["github-actions", "opentofu"]
+    "tfroot-cloudflare"        = ["github-actions", "opentofu"]
+    "tfroot-github"            = ["github-actions", "opentofu"]
+    "tfroot-libvirt"           = ["github-actions", "opentofu"]
     "www"                      = ["github-actions"]
   }
   dependabot_docker_directories = ["gh-cli", "tfroot-runner"]
