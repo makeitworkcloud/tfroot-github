@@ -91,13 +91,6 @@ locals {
       value        = data.sops_file.secret_vars.data["cloudflare_auth_client_secret"]
       repositories = local.active_github_repositories
     }
-    "grafana_alerts_token" = {
-      name = "GRAFANA_ALERTS_TOKEN"
-      # Placeholder until the operator-generated token is copied from the
-      # cluster (see AGENTS.md, "Dependabot PR Alerting").
-      value        = lookup(data.sops_file.secret_vars.data, "grafana_alerts_token", "pending-grafana-service-account-token")
-      repositories = local.active_github_repositories
-    }
     "ssh_private_key" = {
       name  = "SSH_PRIVATE_KEY"
       value = data.sops_file.secret_vars.data["ssh_private_key"]

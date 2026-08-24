@@ -73,7 +73,7 @@ resource "github_repository_file" "dependabot" {
 locals {
   # Caller for the dependabot-notify reusable workflow in shared-workflows.
   # Fires only when Dependabot itself opens the PR; posts a synthetic alert
-  # to the cluster Grafana (see AGENTS.md, "Dependabot PR Alerting").
+  # to the cluster Alertmanager (see AGENTS.md, "Dependabot PR Alerting").
   dependabot_notify_workflow = <<-EOT
     ---
     # Managed by tfroot-github (gh-dependabot.tf); local edits are overwritten.
