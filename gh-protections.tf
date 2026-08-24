@@ -1,3 +1,9 @@
+# Branch protection here is intentionally relaxed for a solo-maintainer,
+# personal-dev organization: `contexts` is empty (CI is advisory, not a merge
+# gate) and `required_approving_review_count` is zero. The PR workflow exists
+# for CI validation, plan output, and change history — not review ceremony.
+# If collaborators join or a repo gains external contributors, tighten
+# `contexts` and `required_approving_review_count` at that time.
 resource "github_branch_protection" "protections" {
   for_each                        = toset([for repo in local.github_repositories : repo if !contains(local.archived_github_repositories, repo)])
   repository_id                   = github_repository.repositories[each.key].node_id
