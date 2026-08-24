@@ -59,6 +59,29 @@ downstream repositories. Pre-commit hook revisions are not covered by
 Dependabot: they are owned by the canonical config in
 `images/tfroot-runner/pre-commit-config.yaml`.
 
+## Dependabot PR Alerting
+
+When Dependabot opens a PR, the managed caller workflow
+(`.github/workflows/dependabot-notify.yml`, from `gh-dependabot.tf`) invokes
+the `dependabot-notify` reusable workflow in `shared-workflows`, which posts a
+synthetic alert to the cluster Grafana's Alertmanager API. Delivery goes to
+Discord via the `GrafanaContactPoint`/`GrafanaNotificationPolicy` CRs in
+`kustomize-cluster/workloads/grafana`.
+
+Two secrets make this work, both distributed here to all active repositories:
+
+- `CLOUDFLARE_AUTH_CLIENT_ID` / `CLOUDFLARE_AUTH_CLIENT_SECRET` — the existing
+  "GitHub Actions" Cloudflare Access service token, allowed by the path-scoped
+  Access app managed in `tfroot-cloudflare/cf-access-grafana.tf`.
+- `GRAFANA_ALERTS_TOKEN` — a Grafana service account token. The account and
+  token are managed as code by the `GrafanaServiceAccount` CR in
+  `kustomize-cluster/workloads/grafana/serviceaccount-alerts.yaml`; the
+  operator writes the generated token to the `grafana-alerts-token` cluster
+  Secret (key `token`). Until that value is copied here into
+  `secrets/secrets.yaml` as `grafana_alerts_token`, the distributed secret is
+  a placeholder and alert delivery fails with a 401 in the caller repo's
+  Actions log.
+
 ## Related Repositories
 
 - `images` - Contains tfroot-runner image and canonical pre-commit config

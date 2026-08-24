@@ -69,3 +69,36 @@ resource "github_repository_file" "dependabot" {
   commit_message      = "chore: sync managed dependabot configuration"
   overwrite_on_create = true
 }
+
+locals {
+  # Caller for the dependabot-notify reusable workflow in shared-workflows.
+  # Fires only when Dependabot itself opens the PR; posts a synthetic alert
+  # to the cluster Grafana (see AGENTS.md, "Dependabot PR Alerting").
+  dependabot_notify_workflow = <<-EOT
+    ---
+    # Managed by tfroot-github (gh-dependabot.tf); local edits are overwritten.
+    name: dependabot-notify
+
+    on:
+      pull_request:
+        types: [opened, reopened]
+
+    permissions: {}
+
+    jobs:
+      notify:
+        if: github.actor == 'dependabot[bot]'
+        uses: makeitworkcloud/shared-workflows/.github/workflows/dependabot-notify.yml@main
+        secrets: inherit
+  EOT
+}
+
+resource "github_repository_file" "dependabot_notify" {
+  for_each = local.dependabot_configs
+
+  repository          = github_repository.repositories[each.key].name
+  file                = ".github/workflows/dependabot-notify.yml"
+  content             = local.dependabot_notify_workflow
+  commit_message      = "chore: sync managed dependabot notification workflow"
+  overwrite_on_create = true
+}
