@@ -35,7 +35,7 @@ locals {
           package-ecosystem = ecosystem
           directory         = "/"
           schedule = {
-            interval = "weekly"
+            interval = "daily"
           }
           groups = {
             (ecosystem) = {
@@ -47,7 +47,7 @@ locals {
           package-ecosystem = "docker"
           directory         = "/${directory}"
           schedule = {
-            interval = "weekly"
+            interval = "daily"
           }
           groups = {
             docker = {
