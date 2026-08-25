@@ -26,12 +26,13 @@ validation, plan output, and change history, not as a review gate. Do not
 tighten `contexts` or `required_approving_review_count` unless explicitly
 requested.
 
-Note: plans perpetually show `+ makeitworkcloud/admins` being re-added to
-`dismissal_restrictions`, `pull_request_bypassers`, and `push_allowances` in
-all repositories, hours after an apply already converged them (cause under
-investigation — org-level reset or provider read quirk). Treat these entries
-as noise and do not "fix" the drift by removing the codified bypass from
-`gh-protections.tf`.
+GitHub silently drops branch-protection bypass actors that have no repository
+access at write time — the apply succeeds but the stored rule omits them, so
+config and live state diverge on every plan. The `admins` bypass entries here
+are only valid because `gh-iam.tf` grants the team admin access to every
+active repository (`github_team_repository.admins`); never remove those
+grants while the bypass entries exist, and grant access to any future bypass
+team in the same apply.
 
 ## Pre-commit Configuration
 
