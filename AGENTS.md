@@ -11,6 +11,12 @@ Use a feature branch and open a pull request rather than pushing directly to
 environment gates approve it. Do not push any branch unless explicitly
 requested.
 
+PRs are squash-merged. If a branch contains commits that already landed on
+`main` via a squash merge (stacked PRs), a plain rebase or merge replays them
+and produces phantom conflicts on the open PR. Rebase with
+`git rebase --onto origin/main <last-squashed-commit>` so only the unique
+commits replay.
+
 ## Branch Protection
 
 Branch protection on `main` is intentionally relaxed for this solo-maintainer,
@@ -19,6 +25,13 @@ approving reviews (see the comment in `gh-protections.tf`). PRs are used for CI
 validation, plan output, and change history, not as a review gate. Do not
 tighten `contexts` or `required_approving_review_count` unless explicitly
 requested.
+
+Note: plans perpetually show `+ makeitworkcloud/admins` being re-added to
+`dismissal_restrictions`, `pull_request_bypassers`, and `push_allowances` in
+all repositories, hours after an apply already converged them (cause under
+investigation — org-level reset or provider read quirk). Treat these entries
+as noise and do not "fix" the drift by removing the codified bypass from
+`gh-protections.tf`.
 
 ## Pre-commit Configuration
 
@@ -59,6 +72,14 @@ downstream repositories. Pre-commit hook revisions are not covered by
 Dependabot: they are owned by the canonical config in
 `images/tfroot-runner/pre-commit-config.yaml`.
 
+Every `github_repository_file` path is force-written to all repositories in
+its `for_each` — including a repository that hand-authors a file at the same
+path (observed 2026-08-24: the managed `dependabot-notify.yml` caller
+overwrote the reusable workflow in `shared-workflows`, breaking it). Before
+adding a managed file, check that no target repository owns that path; when a
+repository must own a file itself, place it at a path no managed distribution
+covers (see `_dependabot-notify.yml`).
+
 ## Dependabot PR Alerting
 
 When Dependabot opens a PR, the managed caller workflow
@@ -76,6 +97,32 @@ The only required secrets are `CLOUDFLARE_AUTH_CLIENT_ID` /
 `CLOUDFLARE_AUTH_CLIENT_SECRET` — the "GitHub Actions" Cloudflare Access
 service token, distributed here to all active repositories. Alertmanager has
 no auth of its own; the Access app is the only gate.
+
+Verify delivery end to end (posts a test message to Discord):
+
+```bash
+CF_ID=$(AWS_PROFILE=makeitwork sops decrypt --extract '["cloudflare_auth_client_id"]' secrets/secrets.yaml)
+CF_SECRET=$(AWS_PROFILE=makeitwork sops decrypt --extract '["cloudflare_auth_client_secret"]' secrets/secrets.yaml)
+curl -fsS -X POST -H "CF-Access-Client-Id: $CF_ID" -H "CF-Access-Client-Secret: $CF_SECRET" \
+  -H "Content-Type: application/json" \
+  -d '[{"labels":{"alertname":"DependabotPR","severity":"info"},"annotations":{"summary":"E2E"}}]' \
+  https://alertmanager.makeitwork.cloud/api/v2/alerts   # expect HTTP 200
+```
+
+A genuinely new Dependabot PR fires `opened` and notifies; `@dependabot
+recreate` fires `synchronize`, which the caller's actor filter excludes.
+
+## SOPS Secrets
+
+`secrets/secrets.yaml` is the org secret source (SOPS, AWS KMS; decrypt with
+`AWS_PROFILE=makeitwork`). Never print decrypted values: move secrets through
+subprocesses (decrypt into a shell variable consumed in the same shell), never
+into chat, logs, or tracked plaintext.
+
+To resolve a git conflict on an encrypted file without decrypting, compare the
+key sets and per-key ciphertext hashes on both sides. If one side contains
+every key the other has, with identical ciphertext except for intended changes,
+take that side wholesale.
 
 ## Related Repositories
 
