@@ -63,24 +63,19 @@ Dependabot: they are owned by the canonical config in
 
 When Dependabot opens a PR, the managed caller workflow
 (`.github/workflows/dependabot-notify.yml`, from `gh-dependabot.tf`) invokes
-the `dependabot-notify` reusable workflow in `shared-workflows`, which posts a
-synthetic alert to the cluster Grafana's Alertmanager API. Delivery goes to
-Discord via the `GrafanaContactPoint`/`GrafanaNotificationPolicy` CRs in
-`kustomize-cluster/workloads/grafana`.
+the `dependabot-notify` reusable workflow in `shared-workflows`
+(`.github/workflows/_dependabot-notify.yml` — the underscore path keeps it
+clear of this managed file's target, which is written to every repository
+including `shared-workflows`), which posts a
+synthetic alert to the cluster Alertmanager (`alertmanager.makeitwork.cloud`,
+kube-prometheus-stack) behind the Cloudflare Access app managed in
+`tfroot-cloudflare/cf-access-alertmanager.tf`. Delivery goes to Discord via
+the Alertmanager config Secret in `kustomize-cluster/operators/kube-prometheus-stack`.
 
-Two secrets make this work, both distributed here to all active repositories:
-
-- `CLOUDFLARE_AUTH_CLIENT_ID` / `CLOUDFLARE_AUTH_CLIENT_SECRET` — the existing
-  "GitHub Actions" Cloudflare Access service token, allowed by the path-scoped
-  Access app managed in `tfroot-cloudflare/cf-access-grafana.tf`.
-- `GRAFANA_ALERTS_TOKEN` — a Grafana service account token. The account and
-  token are managed as code by the `GrafanaServiceAccount` CR in
-  `kustomize-cluster/workloads/grafana/serviceaccount-alerts.yaml`; the
-  operator writes the generated token to the `grafana-alerts-token` cluster
-  Secret (key `token`). Until that value is copied here into
-  `secrets/secrets.yaml` as `grafana_alerts_token`, the distributed secret is
-  a placeholder and alert delivery fails with a 401 in the caller repo's
-  Actions log.
+The only required secrets are `CLOUDFLARE_AUTH_CLIENT_ID` /
+`CLOUDFLARE_AUTH_CLIENT_SECRET` — the "GitHub Actions" Cloudflare Access
+service token, distributed here to all active repositories. Alertmanager has
+no auth of its own; the Access app is the only gate.
 
 ## Related Repositories
 

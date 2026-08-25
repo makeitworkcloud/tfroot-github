@@ -72,8 +72,11 @@ resource "github_repository_file" "dependabot" {
 
 locals {
   # Caller for the dependabot-notify reusable workflow in shared-workflows.
+  # The reusable lives at _dependabot-notify.yml because this file's target
+  # path is managed in every repo, shared-workflows included; a reusable at
+  # the caller's path would be overwritten by this resource on every apply.
   # Fires only when Dependabot itself opens the PR; posts a synthetic alert
-  # to the cluster Grafana (see AGENTS.md, "Dependabot PR Alerting").
+  # to the cluster Alertmanager (see AGENTS.md, "Dependabot PR Alerting").
   dependabot_notify_workflow = <<-EOT
     ---
     # Managed by tfroot-github (gh-dependabot.tf); local edits are overwritten.
@@ -88,7 +91,7 @@ locals {
     jobs:
       notify:
         if: github.actor == 'dependabot[bot]'
-        uses: makeitworkcloud/shared-workflows/.github/workflows/dependabot-notify.yml@main
+        uses: makeitworkcloud/shared-workflows/.github/workflows/_dependabot-notify.yml@main
         secrets: inherit
   EOT
 }
