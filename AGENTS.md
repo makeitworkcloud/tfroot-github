@@ -63,7 +63,10 @@ Dependabot: they are owned by the canonical config in
 
 When Dependabot opens a PR, the managed caller workflow
 (`.github/workflows/dependabot-notify.yml`, from `gh-dependabot.tf`) invokes
-the `dependabot-notify` reusable workflow in `shared-workflows`, which posts a
+the `dependabot-notify` reusable workflow in `shared-workflows`
+(`.github/workflows/_dependabot-notify.yml` — the underscore path keeps it
+clear of this managed file's target, which is written to every repository
+including `shared-workflows`), which posts a
 synthetic alert to the cluster Alertmanager (`alertmanager.makeitwork.cloud`,
 kube-prometheus-stack) behind the Cloudflare Access app managed in
 `tfroot-cloudflare/cf-access-alertmanager.tf`. Delivery goes to Discord via
