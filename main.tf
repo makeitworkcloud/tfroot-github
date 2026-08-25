@@ -15,6 +15,7 @@ locals {
     "terraform-libvirt-domain",
     "tfroot-aws",
     "tfroot-cloudflare",
+    "tfroot-gcp",
     "tfroot-github",
     "tfroot-libvirt",
     "www"
