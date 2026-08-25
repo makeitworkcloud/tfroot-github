@@ -5,8 +5,16 @@ resource "github_membership" "admin" {
 
 resource "github_team" "admins" {
   name        = "admins"
-  description = "ArgoCD administrators"
+  description = "Administrators — ArgoCD admins and GitHub branch-protection bypass actors"
   privacy     = "closed"
+}
+
+resource "github_team_repository" "admins" {
+  for_each = local.active_github_repositories
+
+  team_id    = github_team.admins.id
+  repository = github_repository.repositories[each.key].name
+  permission = "admin"
 }
 
 resource "github_team" "developers" {

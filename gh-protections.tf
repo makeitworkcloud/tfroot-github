@@ -30,5 +30,5 @@ resource "github_branch_protection" "protections" {
       "${var.github_owner}/${github_team.admins.slug}"
     ]
   }
-  depends_on = [github_repository.repositories, github_team.admins]
+  depends_on = [github_repository.repositories, github_team.admins, github_team_repository.admins]
 }
