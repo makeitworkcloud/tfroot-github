@@ -10,6 +10,7 @@ resource "github_branch_protection" "protections" {
   pattern                         = "main"
   enforce_admins                  = false
   allows_force_pushes             = false
+  force_push_bypassers            = ["${var.github_owner}/${github_team.admins.slug}"]
   required_linear_history         = true
   require_conversation_resolution = true
   required_status_checks {

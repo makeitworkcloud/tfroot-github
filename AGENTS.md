@@ -24,7 +24,8 @@ personal-dev organization: no required status check contexts and zero required
 approving reviews (see the comment in `gh-protections.tf`). PRs are used for CI
 validation, plan output, and change history, not as a review gate. Do not
 tighten `contexts` or `required_approving_review_count` unless explicitly
-requested.
+requested. The `admins` team may also force-push (`force_push_bypassers`) for
+history maintenance; all other force pushes remain blocked.
 
 GitHub silently drops branch-protection bypass actors that have no repository
 access at write time — the apply succeeds but the stored rule omits them, so
