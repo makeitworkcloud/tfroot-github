@@ -11,6 +11,7 @@ locals {
     "cflan",
     "kustomize-cluster",
     "images",
+    "opencode-server-config",
     "shared-workflows",
     "terraform-libvirt-domain",
     "tfroot-aws",
