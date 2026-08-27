@@ -9,6 +9,7 @@ locals {
     "ansible-site-cluster",
     "ansible-role-crc",
     "cflan",
+    "charts",
     "kustomize-cluster",
     "images",
     "opencode-server-config",
@@ -38,6 +39,7 @@ locals {
   required_status_checks_by_repository = {
     ".github"                  = ["pre-commit"]
     "cflan"                    = ["lint-and-test (3.10)", "lint-and-test (3.11)", "lint-and-test (3.12)", "lint-and-test (3.13)", "type-check"]
+    "charts"                   = ["test"]
     "images"                   = ["checks"]
     "kustomize-cluster"        = ["test"]
     "opencode-server-config"   = ["lint"]
@@ -83,12 +85,12 @@ locals {
     }
     "www_access_key_id" = {
       name         = "AWS_ACCESS_KEY_ID"
-      value        = data.sops_file.secret_vars.data["www_aws_access_key_id"]
+      value        = data.sops_file.secret_vars.data["www_access_key_id"]
       repositories = ["www"]
     }
     "www_secret_access_key" = {
       name         = "AWS_SECRET_ACCESS_KEY"
-      value        = data.sops_file.secret_vars.data["www_aws_secret_access_key"]
+      value        = data.sops_file.secret_vars.data["www_secret_access_key"]
       repositories = ["www"]
     }
     "cloudflare_zone_id" = {
