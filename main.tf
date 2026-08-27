@@ -12,7 +12,6 @@ locals {
     "charts",
     "kustomize-cluster",
     "images",
-    "opencode-server-config",
     "shared-workflows",
     "terraform-libvirt-domain",
     "tfroot-aws",
@@ -42,7 +41,6 @@ locals {
     "charts"                   = ["test"]
     "images"                   = ["checks"]
     "kustomize-cluster"        = ["test"]
-    "opencode-server-config"   = ["lint"]
     "shared-workflows"         = ["lint"]
     "terraform-libvirt-domain" = ["test"]
     "tfroot-aws"               = ["opentofu / test", "opentofu / plan"]
