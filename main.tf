@@ -9,6 +9,7 @@ locals {
     "ansible-site-cluster",
     "ansible-role-crc",
     "cflan",
+    "charts",
     "kustomize-cluster",
     "images",
     "opencode-server-config",
@@ -38,6 +39,7 @@ locals {
   required_status_checks_by_repository = {
     ".github"                  = ["pre-commit"]
     "cflan"                    = ["lint-and-test (3.10)", "lint-and-test (3.11)", "lint-and-test (3.12)", "lint-and-test (3.13)", "type-check"]
+    "charts"                   = ["test"]
     "images"                   = ["checks"]
     "kustomize-cluster"        = ["test"]
     "opencode-server-config"   = ["lint"]
