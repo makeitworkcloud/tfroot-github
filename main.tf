@@ -36,19 +36,19 @@ locals {
   # Keep this exhaustive for active repositories so a newly managed repository
   # cannot silently receive a branch rule without a required CI check.
   required_status_checks_by_repository = {
-    ".github"                = ["pre-commit"]
-    "cflan"                  = ["lint-and-test (3.10)", "lint-and-test (3.11)", "lint-and-test (3.12)", "lint-and-test (3.13)", "type-check"]
-    "images"                 = ["checks"]
-    "kustomize-cluster"      = ["test"]
-    "opencode-server-config" = ["lint"]
-    "shared-workflows"       = ["lint"]
+    ".github"                  = ["pre-commit"]
+    "cflan"                    = ["lint-and-test (3.10)", "lint-and-test (3.11)", "lint-and-test (3.12)", "lint-and-test (3.13)", "type-check"]
+    "images"                   = ["checks"]
+    "kustomize-cluster"        = ["test"]
+    "opencode-server-config"   = ["lint"]
+    "shared-workflows"         = ["lint"]
     "terraform-libvirt-domain" = ["test"]
-    "tfroot-aws"             = ["opentofu / test", "opentofu / plan"]
-    "tfroot-cloudflare"      = ["opentofu / test", "opentofu / plan"]
-    "tfroot-gcp"             = ["opentofu / test", "opentofu / plan"]
-    "tfroot-github"          = ["opentofu / test", "opentofu / plan"]
-    "tfroot-libvirt"         = ["opentofu / test", "opentofu / plan"]
-    "www"                    = ["static-checks"]
+    "tfroot-aws"               = ["opentofu / test", "opentofu / plan"]
+    "tfroot-cloudflare"        = ["opentofu / test", "opentofu / plan"]
+    "tfroot-gcp"               = ["opentofu / test", "opentofu / plan"]
+    "tfroot-github"            = ["opentofu / test", "opentofu / plan"]
+    "tfroot-libvirt"           = ["opentofu / test", "opentofu / plan"]
+    "www"                      = ["static-checks"]
   }
   secrets = {
     "onion_s3_bucket" = {
@@ -68,7 +68,7 @@ locals {
     }
     "onion_secret_access_key" = {
       name         = "ONION_AWS_SECRET_ACCESS_KEY"
-      value        = data.sops_file.secret_vars.data["onion_secret_access_key"]
+      value        = data.sops_file.secret_vars.data["onion_aws_secret_access_key"]
       repositories = ["www"]
     }
     "www_s3_bucket" = {
