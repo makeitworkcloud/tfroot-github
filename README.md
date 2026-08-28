@@ -43,4 +43,8 @@ No modules.
 ## Outputs
 
 No outputs.
+
+## Operator guides
+
+- [Chart updater GitHub App runbook](docs/chart-updater-github-app.md)
 <!-- END_TF_DOCS -->
