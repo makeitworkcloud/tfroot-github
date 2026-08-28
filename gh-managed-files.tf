@@ -6,7 +6,7 @@
 # yet, so neither can safely receive this caller file.
 locals {
   managed_opentofu_workflows = {
-    "tfroot-aws" = <<-EOT
+    "tfroot-aws"        = <<-EOT
       # Managed by tfroot-github (gh-managed-files.tf); local edits are overwritten.
       name: opentofu
 
@@ -56,7 +56,7 @@ locals {
             github.event.pull_request.head.repo.full_name == github.repository
           uses: makeitworkcloud/shared-workflows/.github/workflows/opentofu.yml@main
     EOT
-    "tfroot-gcp" = <<-EOT
+    "tfroot-gcp"        = <<-EOT
       # Managed by tfroot-github (gh-managed-files.tf); local edits are overwritten.
       name: opentofu
 
@@ -84,7 +84,7 @@ locals {
             gcp-workload-identity-provider: projects/920734942788/locations/global/workloadIdentityPools/github/providers/github
             gcp-service-account: terraformer@makeitworkcloud.iam.gserviceaccount.com
     EOT
-    "tfroot-github" = <<-EOT
+    "tfroot-github"     = <<-EOT
       # Managed by tfroot-github (gh-managed-files.tf); local edits are overwritten.
       name: opentofu
 
@@ -109,7 +109,7 @@ locals {
             github.event.pull_request.head.repo.full_name == github.repository
           uses: makeitworkcloud/shared-workflows/.github/workflows/opentofu.yml@main
     EOT
-    "tfroot-libvirt" = <<-EOT
+    "tfroot-libvirt"    = <<-EOT
       # Managed by tfroot-github (gh-managed-files.tf); local edits are overwritten.
       name: opentofu
 
