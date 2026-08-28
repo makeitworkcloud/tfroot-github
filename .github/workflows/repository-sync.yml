@@ -1,0 +1,130 @@
+name: repository-sync
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - LICENSE
+      - repository-sync/**
+      - .github/workflows/repository-sync.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  sync:
+    runs-on: arc-tf
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
+        with:
+          aws-region: us-west-2
+          role-to-assume: arn:aws:iam::332355796717:role/github-actions-repository-sync
+          role-session-name: tfroot-github-repository-sync
+
+      - name: Read GitHub App private key
+        id: app-key
+        env:
+          SECRET_ARN: arn:aws:secretsmanager:us-west-2:332355796717:secret:xnoto-s-chart-updater-github-app-private-key-qP4Qr3
+        run: |
+          set -euo pipefail
+          private_key="$(aws secretsmanager get-secret-value --secret-id "$SECRET_ARN" --query SecretString --output text)"
+          test -n "$private_key"
+          echo "::add-mask::$private_key"
+          {
+            echo 'private-key<<EOF'
+            printf '%s\n' "$private_key"
+            echo EOF
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Create scoped GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          app-id: "4745727"
+          private-key: ${{ steps.app-key.outputs.private-key }}
+          owner: makeitworkcloud
+          permission-contents: write
+          permission-pull-requests: write
+          permission-workflows: write
+
+      - name: Create or update sync pull requests
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          STANDARD_WORKFLOW: repository-sync/opentofu-standard.yml
+          GCP_WORKFLOW: repository-sync/opentofu-gcp.yml
+          LIBVIRT_WORKFLOW: repository-sync/opentofu-libvirt.yml
+        with:
+          github-token: ${{ steps.app-token.outputs.token }}
+          script: |
+            const fs = require('fs');
+            const owner = 'makeitworkcloud';
+            const branch = 'automation/repository-sync';
+            const workflowPath = '.github/workflows/opentofu.yml';
+            const license = fs.readFileSync('LICENSE', 'utf8');
+            const workflows = {
+              'tfroot-aws': fs.readFileSync(process.env.STANDARD_WORKFLOW, 'utf8'),
+              'tfroot-cloudflare': fs.readFileSync(process.env.STANDARD_WORKFLOW, 'utf8'),
+              'tfroot-gcp': fs.readFileSync(process.env.GCP_WORKFLOW, 'utf8'),
+              'tfroot-github': fs.readFileSync(process.env.STANDARD_WORKFLOW, 'utf8'),
+              'tfroot-libvirt': fs.readFileSync(process.env.LIBVIRT_WORKFLOW, 'utf8'),
+            };
+            const licenseRepositories = [
+              '.github', 'cflan', 'charts', 'images', 'kustomize-cluster',
+              'shared-workflows', 'terraform-libvirt-domain', 'tfroot-aws',
+              'tfroot-cloudflare', 'tfroot-gcp', 'tfroot-github',
+              'tfroot-libvirt', 'www',
+            ];
+            const desired = new Map(licenseRepositories.map((repo) => [repo, [{ path: 'LICENSE', content: license }]]));
+            for (const [repo, content] of Object.entries(workflows)) {
+              desired.get(repo).push({ path: workflowPath, content });
+            }
+
+            async function ensureBranch(repo, base) {
+              try {
+                await github.rest.git.getRef({ owner, repo, ref: `heads/${branch}` });
+              } catch (error) {
+                if (error.status !== 404) throw error;
+                const { data: baseRef } = await github.rest.git.getRef({ owner, repo, ref: `heads/${base}` });
+                await github.rest.git.createRef({ owner, repo, ref: `refs/heads/${branch}`, sha: baseRef.object.sha });
+              }
+            }
+
+            for (const [repo, files] of desired) {
+              const { data: metadata } = await github.rest.repos.get({ owner, repo });
+              const base = metadata.default_branch;
+              if (!base) continue;
+              await ensureBranch(repo, base);
+              let changed = false;
+              for (const file of files) {
+                let current;
+                try {
+                  const { data } = await github.rest.repos.getContent({ owner, repo, path: file.path, ref: branch });
+                  if (Array.isArray(data) || data.type !== 'file') throw new Error(`Expected ${repo}/${file.path} to be a file`);
+                  current = data;
+                  if (Buffer.from(data.content, 'base64').toString('utf8') === file.content) continue;
+                } catch (error) {
+                  if (error.status !== 404) throw error;
+                }
+                await github.rest.repos.createOrUpdateFileContents({
+                  owner, repo, path: file.path, branch,
+                  sha: current?.sha,
+                  message: `chore: sync managed ${file.path}`,
+                  content: Buffer.from(file.content).toString('base64'),
+                });
+                changed = true;
+              }
+              if (!changed) continue;
+              const { data: existing } = await github.rest.pulls.list({ owner, repo, state: 'open', head: `${owner}:${branch}` });
+              if (existing.length === 0) {
+                await github.rest.pulls.create({
+                  owner, repo, head: branch, base,
+                  title: 'chore: sync managed repository files',
+                  body: 'Generated by tfroot-github. This PR updates centrally managed workflow and/or GPLv3 license files. It does not bypass branch protection and must be reviewed and merged normally.',
+                });
+              }
+            }
