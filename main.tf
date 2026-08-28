@@ -103,6 +103,11 @@ locals {
       value        = data.sops_file.secret_vars.data["cloudflare_api_token"]
       repositories = ["www"]
     }
+    "namecheap_api_key" = {
+      name         = "NAMECHEAP_API_KEY"
+      value        = data.sops_file.secret_vars.data["namecheap_api_key"]
+      repositories = ["tfroot-namecheap"]
+    }
     "cloudflare_auth_client_id" = {
       name         = "CLOUDFLARE_AUTH_CLIENT_ID"
       value        = data.sops_file.secret_vars.data["cloudflare_auth_client_id"]
