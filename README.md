@@ -27,6 +27,8 @@ No modules.
 | [github_repository.repositories](https://registry.terraform.io/providers/integrations/github/latest/docs/resources/repository) | resource |
 | [github_repository_file.dependabot](https://registry.terraform.io/providers/integrations/github/latest/docs/resources/repository_file) | resource |
 | [github_repository_file.dependabot_notify](https://registry.terraform.io/providers/integrations/github/latest/docs/resources/repository_file) | resource |
+| [github_repository_file.license](https://registry.terraform.io/providers/integrations/github/latest/docs/resources/repository_file) | resource |
+| [github_repository_file.opentofu_workflow](https://registry.terraform.io/providers/integrations/github/latest/docs/resources/repository_file) | resource |
 | [github_team.admins](https://registry.terraform.io/providers/integrations/github/latest/docs/resources/team) | resource |
 | [github_team.developers](https://registry.terraform.io/providers/integrations/github/latest/docs/resources/team) | resource |
 | [github_team_membership.admins_xnoto](https://registry.terraform.io/providers/integrations/github/latest/docs/resources/team_membership) | resource |
@@ -36,7 +38,7 @@ No modules.
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-| ---- | ----------- | ---- | ------- | :------: |
+| ----- | ----------- | ---- | ------- | :------: |
 | <a name="input_github_owner"></a> [github\_owner](#input\_github\_owner) | The GitHub owner (user or organization) for the repository. | `string` | `"makeitworkcloud"` | no |
 | <a name="input_github_visibility"></a> [github\_visibility](#input\_github\_visibility) | Public, private, or internal visibility | `string` | `"public"` | no |
 
