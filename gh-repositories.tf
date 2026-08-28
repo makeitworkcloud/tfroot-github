@@ -3,7 +3,7 @@ resource "github_repository" "repositories" {
   name                        = each.key
   archived                    = contains(local.archived_github_repositories, each.key)
   visibility                  = var.github_visibility
-  auto_init                   = each.key == "charts"
+  auto_init                   = true
   allow_squash_merge          = true
   allow_merge_commit          = true
   allow_rebase_merge          = false
