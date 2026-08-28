@@ -23,6 +23,7 @@ locals {
     "tfroot-cloudflare"        = ["github-actions", "opentofu"]
     "tfroot-github"            = ["github-actions", "opentofu"]
     "tfroot-libvirt"           = ["github-actions", "opentofu"]
+    "tfroot-namecheap"         = ["github-actions", "opentofu"]
     "www"                      = ["github-actions"]
   }
   dependabot_docker_directories = ["gh-cli", "tfroot-runner"]
