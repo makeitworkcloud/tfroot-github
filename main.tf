@@ -19,6 +19,7 @@ locals {
     "tfroot-gcp",
     "tfroot-github",
     "tfroot-libvirt",
+    "tfroot-namecheap",
     "www"
   ])
   archived_github_repositories = toset([
@@ -48,6 +49,7 @@ locals {
     "tfroot-gcp"               = ["opentofu / test", "opentofu / plan"]
     "tfroot-github"            = ["opentofu / test", "opentofu / plan"]
     "tfroot-libvirt"           = ["opentofu / test", "opentofu / plan"]
+    "tfroot-namecheap"         = ["opentofu / test", "opentofu / plan"]
     "www"                      = ["static-checks"]
   }
   secrets = {
