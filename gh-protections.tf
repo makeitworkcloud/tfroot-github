@@ -25,5 +25,14 @@ resource "github_branch_protection" "protections" {
       "${var.github_owner}/${github_team.admins.slug}"
     ]
   }
-  depends_on = [github_repository.repositories, github_team.admins, github_team_repository.admins]
+  # Seed centrally managed files before protecting a newly added repository's
+  # main branch. Without this ordering, GitHub can reject the file commits as
+  # soon as the required-check rule is created in the same apply.
+  depends_on = [
+    github_repository.repositories,
+    github_repository_file.dependabot,
+    github_repository_file.dependabot_notify,
+    github_team.admins,
+    github_team_repository.admins,
+  ]
 }
