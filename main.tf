@@ -10,7 +10,7 @@ locals {
     "ansible-role-crc",
     "cflan",
     "charts",
-    "home-knowledge",
+    "agent-knowledge",
     "kustomize-cluster",
     "images",
     "shared-workflows",
@@ -29,10 +29,10 @@ locals {
     "ansible-role-crc"
   ])
   private_github_repositories = toset([
-    "home-knowledge"
+    "agent-knowledge"
   ])
   relaxed_branch_protection_github_repositories = toset([
-    "home-knowledge"
+    "agent-knowledge"
   ])
   # Non-archived repositories. Secrets cannot be written to archived repos,
   # so org-wide secrets must target this list rather than github_repositories.
@@ -133,16 +133,12 @@ locals {
     "ssh_private_key" = {
       name  = "SSH_PRIVATE_KEY"
       value = data.sops_file.secret_vars.data["ssh_private_key"]
-      repositories = [
-        "tfroot-libvirt"
-      ]
+      repositories = ["tfroot-libvirt"]
     }
     "ssh_known_hosts" = {
       name  = "SSH_KNOWN_HOSTS"
       value = data.sops_file.secret_vars.data["ssh_known_hosts"]
-      repositories = [
-        "tfroot-libvirt"
-      ]
+      repositories = ["tfroot-libvirt"]
     }
   }
 }
