@@ -10,6 +10,7 @@ locals {
     "ansible-role-crc",
     "cflan",
     "charts",
+    "home-knowledge",
     "kustomize-cluster",
     "images",
     "shared-workflows",
@@ -26,6 +27,12 @@ locals {
     "ansible-project-libvirt",
     "ansible-site-cluster",
     "ansible-role-crc"
+  ])
+  private_github_repositories = toset([
+    "home-knowledge"
+  ])
+  relaxed_branch_protection_github_repositories = toset([
+    "home-knowledge"
   ])
   # Non-archived repositories. Secrets cannot be written to archived repos,
   # so org-wide secrets must target this list rather than github_repositories.
@@ -70,7 +77,7 @@ locals {
     }
     "onion_secret_access_key" = {
       name         = "ONION_AWS_SECRET_ACCESS_KEY"
-      value        = data.sops_file.secret_vars.data["onion_aws_secret_access_key"]
+      value        = data.sops_file.secret_vars.data["onion_secret_access_key"]
       repositories = ["www"]
     }
     "www_s3_bucket" = {
@@ -85,12 +92,12 @@ locals {
     }
     "www_access_key_id" = {
       name         = "AWS_ACCESS_KEY_ID"
-      value        = data.sops_file.secret_vars.data["www_aws_access_key_id"]
+      value        = data.sops_file.secret_vars.data["www_access_key_id"]
       repositories = ["www"]
     }
     "www_secret_access_key" = {
       name         = "AWS_SECRET_ACCESS_KEY"
-      value        = data.sops_file.secret_vars.data["www_aws_secret_access_key"]
+      value        = data.sops_file.secret_vars.data["www_secret_access_key"]
       repositories = ["www"]
     }
     "cloudflare_zone_id" = {

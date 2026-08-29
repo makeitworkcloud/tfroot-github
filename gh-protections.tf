@@ -1,8 +1,14 @@
 # Every active repository requires a pull request with its configured CI checks
-# passing before merge. The check map lives in main.tf because check-run names
-# differ by repository and GitHub treats an unknown required check as pending.
+# passing before merge, except repositories explicitly assigned the relaxed
+# protection profile below. The check map lives in main.tf because check-run
+# names differ by repository and GitHub treats an unknown required check as
+# pending.
 resource "github_branch_protection" "protections" {
-  for_each                        = toset([for repo in local.github_repositories : repo if !contains(local.archived_github_repositories, repo)])
+  for_each = toset([
+    for repo in local.github_repositories : repo
+    if !contains(local.archived_github_repositories, repo) && !contains(local.relaxed_branch_protection_github_repositories, repo)
+  ])
+
   repository_id                   = github_repository.repositories[each.key].node_id
   pattern                         = "main"
   enforce_admins                  = true
@@ -32,6 +38,37 @@ resource "github_branch_protection" "protections" {
     github_repository.repositories,
     github_repository_file.dependabot,
     github_repository_file.dependabot_notify,
+    github_team.admins,
+    github_team_repository.admins,
+  ]
+}
+
+# Personal knowledge repositories retain pull-request-only writes and basic
+# branch integrity, while allowing any pull request to merge without a CI,
+# approval, code-owner, or conversation-resolution gate.
+resource "github_branch_protection" "relaxed_protections" {
+  for_each = toset([
+    for repo in local.relaxed_branch_protection_github_repositories : repo
+    if !contains(local.archived_github_repositories, repo)
+  ])
+
+  repository_id           = github_repository.repositories[each.key].node_id
+  pattern                 = "main"
+  enforce_admins          = true
+  allows_force_pushes     = false
+  required_linear_history = true
+  required_pull_request_reviews {
+    require_code_owner_reviews      = false
+    required_approving_review_count = 0
+    require_last_push_approval      = false
+  }
+  restrict_pushes {
+    push_allowances = [
+      "${var.github_owner}/${github_team.admins.slug}"
+    ]
+  }
+  depends_on = [
+    github_repository.repositories,
     github_team.admins,
     github_team_repository.admins,
   ]
