@@ -34,6 +34,14 @@ locals {
   relaxed_branch_protection_github_repositories = toset([
     "agent-knowledge"
   ])
+  # Repositories where automation-created pull requests merge themselves once
+  # required checks pass. GitHub auto-merge is enabled only for these
+  # repositories (see gh-repositories.tf). kustomize-cluster receives the
+  # charts post-publish opencode-server pin pull request, which merges after
+  # its required `test` check passes.
+  auto_merge_github_repositories = toset([
+    "kustomize-cluster"
+  ])
   active_github_repositories = toset([
     for repo in local.github_repositories : repo
     if !contains(local.archived_github_repositories, repo)
@@ -67,12 +75,12 @@ locals {
     }
     "onion_access_key_id" = {
       name         = "ONION_AWS_ACCESS_KEY_ID"
-      value        = data.sops_file.secret_vars.data["onion_aws_access_key_id"]
+      value        = data.sops_file.secret_vars.data["onion_access_key_id"]
       repositories = ["www"]
     }
     "onion_secret_access_key" = {
       name         = "ONION_AWS_SECRET_ACCESS_KEY"
-      value        = data.sops_file.secret_vars.data["onion_aws_secret_access_key"]
+      value        = data.sops_file.secret_vars.data["onion_secret_access_key"]
       repositories = ["www"]
     }
     "www_s3_bucket" = {
@@ -87,12 +95,12 @@ locals {
     }
     "www_access_key_id" = {
       name         = "AWS_ACCESS_KEY_ID"
-      value        = data.sops_file.secret_vars.data["www_aws_access_key_id"]
+      value        = data.sops_file.secret_vars.data["www_access_key_id"]
       repositories = ["www"]
     }
     "www_secret_access_key" = {
       name         = "AWS_SECRET_ACCESS_KEY"
-      value        = data.sops_file.secret_vars.data["www_aws_secret_access_key"]
+      value        = data.sops_file.secret_vars.data["www_secret_access_key"]
       repositories = ["www"]
     }
     "cloudflare_zone_id" = {

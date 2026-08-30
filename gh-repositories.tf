@@ -7,6 +7,9 @@ resource "github_repository" "repositories" {
   allow_squash_merge          = true
   allow_merge_commit          = true
   allow_rebase_merge          = false
+  # Auto-merge stays off except for repositories whose automation-created pull
+  # requests are expected to merge themselves once required checks pass.
+  allow_auto_merge            = contains(local.auto_merge_github_repositories, each.key)
   delete_branch_on_merge      = true
   squash_merge_commit_title   = "PR_TITLE"
   squash_merge_commit_message = "PR_BODY"

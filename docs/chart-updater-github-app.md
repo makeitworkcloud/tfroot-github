@@ -10,8 +10,9 @@ The [charts workflow](https://github.com/makeitworkcloud/charts/blob/main/.githu
 publishes an immutable `opencode-server` chart release and uses a short-lived
 GitHub App installation token to update the
 [GitOps chart reference](https://github.com/makeitworkcloud/kustomize-cluster/blob/main/workloads/apps/opencode-app.yaml).
-The workflow opens a pull request; it does not sync Argo CD or deploy the
-release.
+The workflow opens a pull request and enables GitHub auto-merge on it, so the
+pull request squash-merges once the destination's required checks pass. The
+workflow does not sync Argo CD or deploy the release directly.
 
 The current source repository, destination repository, App ID, Actions secret
 name, and token repository request are defined in the charts workflow and in
@@ -32,6 +33,7 @@ approved cleanup after the agreed rollback window.
 | GitHub App creation, permissions, keys, and organization installation | Organization owners manage these manually in GitHub. This root does not Terraform-manage the App or its installation. |
 | Encrypted private key and Actions secret recipients | This root owns the SOPS-backed value and recipient list in [`main.tf`](../main.tf), using the encryption policy in [`.sops.yaml`](../.sops.yaml). |
 | Actions secret distribution | [`gh-secrets.tf`](../gh-secrets.tf) writes the configured repository secret. It cannot create or configure a GitHub App. |
+| Repository merge settings and branch protections | This root owns them in [`gh-repositories.tf`](../gh-repositories.tf) and [`gh-protections.tf`](../gh-protections.tf), including which repositories allow auto-merge. |
 | Chart publication and updater token request | The [charts workflow](https://github.com/makeitworkcloud/charts/blob/main/.github/workflows/helm.yml) owns the App ID reference, requested repositories, requested token permissions, and pull-request automation. |
 | Desired deployment state and rollout | `kustomize-cluster` owns the GitOps reference. Follow its [rollout and rollback guide](https://github.com/makeitworkcloud/kustomize-cluster/blob/main/docs/rollout-and-rollback.md). |
 
@@ -157,8 +159,9 @@ chart versions are immutable.
 5. Verify the generated pull request is authored through the App, changes only
    the intended GitOps chart reference, and pins `targetRevision` to the newly
    published immutable version.
-6. Treat the generated pull request as the credential smoke test. Review and
-   roll it out separately using the `kustomize-cluster` [rollout and rollback
+6. Treat the generated pull request as the credential smoke test. It merges
+   automatically once the destination's required checks pass; verify the
+   rollout separately using the `kustomize-cluster` [rollout and rollback
    guide](https://github.com/makeitworkcloud/kustomize-cluster/blob/main/docs/rollout-and-rollback.md).
    The updater must not sync Argo CD or deploy directly.
 7. Delete the old App key only after the new key has passed this smoke test and
@@ -187,7 +190,8 @@ Adding a source broadens private-key distribution and requires explicit review.
 
 1. Decide separately whether this root should Terraform-manage the repository.
    If so, update the managed repository and required-check maps in
-   [`main.tf`](../main.tf).
+   [`main.tf`](../main.tf), and decide whether the destination belongs in
+   `local.auto_merge_github_repositories`.
 2. Add the destination to the App's organization installation using **Only
    select repositories**. This is a manual organization-owner action.
 3. Add the destination to the source workflow's `repositories` token request
