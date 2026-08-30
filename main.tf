@@ -10,6 +10,7 @@ locals {
     "ansible-role-crc",
     "cflan",
     "charts",
+    "agent-knowledge",
     "kustomize-cluster",
     "images",
     "shared-workflows",
@@ -27,15 +28,16 @@ locals {
     "ansible-site-cluster",
     "ansible-role-crc"
   ])
-  # Non-archived repositories. Secrets cannot be written to archived repos,
-  # so org-wide secrets must target this list rather than github_repositories.
+  private_github_repositories = toset([
+    "agent-knowledge"
+  ])
+  relaxed_branch_protection_github_repositories = toset([
+    "agent-knowledge"
+  ])
   active_github_repositories = toset([
     for repo in local.github_repositories : repo
     if !contains(local.archived_github_repositories, repo)
   ])
-  # Status-check names are GitHub check-run names, not workflow filenames.
-  # Keep this exhaustive for active repositories so a newly managed repository
-  # cannot silently receive a branch rule without a required CI check.
   required_status_checks_by_repository = {
     ".github"                  = ["pre-commit"]
     "cflan"                    = ["lint-and-test (3.10)", "lint-and-test (3.11)", "lint-and-test (3.12)", "lint-and-test (3.13)", "type-check"]
@@ -124,18 +126,14 @@ locals {
       repositories = ["charts"]
     }
     "ssh_private_key" = {
-      name  = "SSH_PRIVATE_KEY"
-      value = data.sops_file.secret_vars.data["ssh_private_key"]
-      repositories = [
-        "tfroot-libvirt"
-      ]
+      name         = "SSH_PRIVATE_KEY"
+      value        = data.sops_file.secret_vars.data["ssh_private_key"]
+      repositories = ["tfroot-libvirt"]
     }
     "ssh_known_hosts" = {
-      name  = "SSH_KNOWN_HOSTS"
-      value = data.sops_file.secret_vars.data["ssh_known_hosts"]
-      repositories = [
-        "tfroot-libvirt"
-      ]
+      name         = "SSH_KNOWN_HOSTS"
+      value        = data.sops_file.secret_vars.data["ssh_known_hosts"]
+      repositories = ["tfroot-libvirt"]
     }
   }
 }
