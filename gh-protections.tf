@@ -1,3 +1,9 @@
+# Resolve the chart updater App to its GraphQL node ID. Branch protection
+# allowances cannot use the App's numeric ID or bot login directly.
+data "github_app" "chart_updater" {
+  slug = "makeitworkbot"
+}
+
 # Every active public repository requires a pull request with its configured CI
 # checks passing before merge, except repositories explicitly assigned the
 # relaxed protection profile below. Private repositories are deliberately
@@ -29,9 +35,13 @@ resource "github_branch_protection" "protections" {
     require_last_push_approval      = false
   }
   restrict_pushes {
-    push_allowances = [
-      "${var.github_owner}/${github_team.admins.slug}"
-    ]
+    # Push allowances do not bypass the pull-request or required-check gates.
+    # The chart updater App is added only for its kustomize-cluster destination
+    # so GitHub may complete an eligible auto-merge after `test` passes.
+    push_allowances = concat(
+      ["${var.github_owner}/${github_team.admins.slug}"],
+      each.key == "kustomize-cluster" ? [data.github_app.chart_updater.node_id] : [],
+    )
   }
   # Seed centrally managed files before protecting a newly added repository's
   # main branch. Without this ordering, GitHub can reject the file commits as

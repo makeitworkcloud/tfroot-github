@@ -32,6 +32,7 @@ No modules.
 | [github_team.developers](https://registry.terraform.io/providers/integrations/github/latest/docs/resources/team) | resource |
 | [github_team_membership.admins_xnoto](https://registry.terraform.io/providers/integrations/github/latest/docs/resources/team_membership) | resource |
 | [github_team_repository.admins](https://registry.terraform.io/providers/integrations/github/latest/docs/resources/team_repository) | resource |
+| [github_app.chart_updater](https://registry.terraform.io/providers/integrations/github/latest/docs/data-sources/app) | data source |
 | [sops_file.secret_vars](https://registry.terraform.io/providers/carlpett/sops/latest/docs/data-sources/file) | data source |
 
 ## Inputs
