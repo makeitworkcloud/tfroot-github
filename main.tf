@@ -34,6 +34,14 @@ locals {
   relaxed_branch_protection_github_repositories = toset([
     "agent-knowledge"
   ])
+  # Repositories where automation-created pull requests merge themselves once
+  # required checks pass. GitHub auto-merge is enabled only for these
+  # repositories (see gh-repositories.tf). kustomize-cluster receives the
+  # charts post-publish opencode-server pin pull request, which merges after
+  # its required `test` check passes.
+  auto_merge_github_repositories = toset([
+    "kustomize-cluster"
+  ])
   active_github_repositories = toset([
     for repo in local.github_repositories : repo
     if !contains(local.archived_github_repositories, repo)
