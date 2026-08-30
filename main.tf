@@ -87,12 +87,12 @@ locals {
     }
     "www_access_key_id" = {
       name         = "AWS_ACCESS_KEY_ID"
-      value        = data.sops_file.secret_vars.data["www_aws_access_key_id"]
+      value        = data.sops_file.secret_vars.data["www_access_key_id"]
       repositories = ["www"]
     }
     "www_secret_access_key" = {
       name         = "AWS_SECRET_ACCESS_KEY"
-      value        = data.sops_file.secret_vars.data["www_aws_secret_access_key"]
+      value        = data.sops_file.secret_vars.data["www_secret_access_key"]
       repositories = ["www"]
     }
     "cloudflare_zone_id" = {
@@ -121,9 +121,16 @@ locals {
       repositories = local.active_github_repositories
     }
     "chart_updater_github_app_private_key" = {
-      name         = "CHART_UPDATER_GITHUB_APP_PRIVATE_KEY"
-      value        = data.sops_file.secret_vars.data["chart_updater_github_app_private_key"]
-      repositories = ["charts"]
+      name  = "CHART_UPDATER_GITHUB_APP_PRIVATE_KEY"
+      value = data.sops_file.secret_vars.data["chart_updater_github_app_private_key"]
+      repositories = [
+        "charts",
+        "tfroot-aws",
+        "tfroot-cloudflare",
+        "tfroot-gcp",
+        "tfroot-github",
+        "tfroot-libvirt",
+      ]
     }
     "ssh_private_key" = {
       name         = "SSH_PRIVATE_KEY"
