@@ -121,9 +121,16 @@ locals {
       repositories = local.active_github_repositories
     }
     "chart_updater_github_app_private_key" = {
-      name         = "CHART_UPDATER_GITHUB_APP_PRIVATE_KEY"
-      value        = data.sops_file.secret_vars.data["chart_updater_github_app_private_key"]
-      repositories = ["charts"]
+      name  = "CHART_UPDATER_GITHUB_APP_PRIVATE_KEY"
+      value = data.sops_file.secret_vars.data["chart_updater_github_app_private_key"]
+      repositories = [
+        "charts",
+        "tfroot-aws",
+        "tfroot-cloudflare",
+        "tfroot-gcp",
+        "tfroot-github",
+        "tfroot-libvirt",
+      ]
     }
     "ssh_private_key" = {
       name         = "SSH_PRIVATE_KEY"
