@@ -138,6 +138,7 @@ locals {
         "tfroot-gcp",
         "tfroot-github",
         "tfroot-libvirt",
+        "tfroot-namecheap",
       ]
     }
     "ssh_private_key" = {
