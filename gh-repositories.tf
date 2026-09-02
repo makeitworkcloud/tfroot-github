@@ -13,6 +13,11 @@ resource "github_repository" "repositories" {
   delete_branch_on_merge      = true
   squash_merge_commit_title   = "PR_TITLE"
   squash_merge_commit_message = "PR_BODY"
+  # Topics are declared in main.tf (local.topics_by_repository) next to the
+  # repository list so every repository's topics live where repositories are
+  # defined. A missing entry fails the plan; use an explicit empty list for a
+  # repository that should carry no topics.
+  topics = local.topics_by_repository[each.key]
   lifecycle {
     ignore_changes = [
       description,

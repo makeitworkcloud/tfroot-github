@@ -31,6 +31,31 @@ locals {
   private_github_repositories = toset([
     "agent-knowledge"
   ])
+  # Topics are managed for every repository in github_repositories. The
+  # lookup in gh-repositories.tf is direct, so adding a repository without a
+  # topics entry fails the plan; a repository intentionally without topics
+  # declares an explicit empty list. Values audited against live GitHub
+  # repository topics on 2026-09-02.
+  topics_by_repository = {
+    ".github"                  = ["community-health", "github", "org-profile"]
+    "agent-knowledge"          = ["agents", "documentation", "knowledge-base", "opencode"]
+    "ansible-project-libvirt"  = ["ansible-playbooks", "libvirt"]
+    "ansible-role-crc"         = ["ansible", "ansible-role", "crc", "openshift-local"]
+    "ansible-site-cluster"     = ["ansible", "ansible-playbook", "gitops", "ksops", "openshift", "openshift-local"]
+    "cflan"                    = ["cloudflare", "dns", "networking", "networkmanager", "python"]
+    "charts"                   = ["ghcr", "gitops", "helm", "helm-charts", "oci"]
+    "images"                   = ["buildah", "containerfiles", "custom-runners", "github-actions", "opentofu"]
+    "kustomize-cluster"        = ["app-of-apps", "argocd", "gitops", "k3s", "ksops", "kustomize", "sops"]
+    "shared-workflows"         = ["github-actions", "github-workflows", "opentofu", "reusable-workflows", "shared-workflows"]
+    "terraform-libvirt-domain" = ["cloud-init", "libvirt", "libvirt-provider", "terraform-module"]
+    "tfroot-aws"               = ["aws-provider", "kms", "opentofu", "s3-backend", "sops", "tfstate"]
+    "tfroot-cloudflare"        = ["cloudflare", "cloudflare-access", "cloudflare-tunnel", "opentofu", "s3-backend", "sops", "tfstate"]
+    "tfroot-gcp"               = ["gcp", "gcs-backend", "kms", "opentofu", "sops", "tfstate", "workload-identity-federation"]
+    "tfroot-github"            = ["github-actions", "opentofu", "s3-backend", "sops", "tfstate", "terraform-provider-github"]
+    "tfroot-libvirt"           = ["cloud-init", "k3s", "libvirt", "libvirt-provider", "opentofu", "s3-backend", "sops", "tfstate"]
+    "tfroot-namecheap"         = ["cloudflare", "dns", "domains", "namecheap", "opentofu"]
+    "www"                      = ["cloudflare", "css", "html", "pwa", "s3", "static-site"]
+  }
   relaxed_branch_protection_github_repositories = toset([
     "agent-knowledge"
   ])
