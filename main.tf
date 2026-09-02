@@ -31,14 +31,6 @@ locals {
   private_github_repositories = toset([
     "agent-knowledge"
   ])
-  # Topics are managed for active repositories only
-  # (local.active_github_repositories). Archived repositories are skipped
-  # entirely (see gh-repositories.tf) and their existing GitHub topics stay
-  # unmanaged, so they carry no entry here. The lookup for active
-  # repositories is direct, so adding an active repository without a topics
-  # entry fails the plan; a repository intentionally without topics declares
-  # an explicit empty list. Values audited against live GitHub repository
-  # topics on 2026-09-02.
   topics_by_repository = {
     ".github"                  = ["community-health", "github", "org-profile"]
     "agent-knowledge"          = ["agents", "documentation", "knowledge-base", "opencode"]

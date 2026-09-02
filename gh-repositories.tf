@@ -13,12 +13,7 @@ resource "github_repository" "repositories" {
   delete_branch_on_merge      = true
   squash_merge_commit_title   = "PR_TITLE"
   squash_merge_commit_message = "PR_BODY"
-  # Topics are declared in main.tf (local.topics_by_repository) and managed
-  # for active repositories only (local.active_github_repositories);
-  # archived repositories are skipped and their existing GitHub topics stay
-  # unmanaged. A missing entry for an active repository fails the plan; use
-  # an explicit empty list for a repository that should carry no topics.
-  topics = contains(local.active_github_repositories, each.key) ? local.topics_by_repository[each.key] : null
+  topics                      = contains(local.active_github_repositories, each.key) ? local.topics_by_repository[each.key] : null
   lifecycle {
     ignore_changes = [
       description,
