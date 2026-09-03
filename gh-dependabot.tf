@@ -24,6 +24,7 @@ locals {
     "tfroot-github"            = ["github-actions", "opentofu"]
     "tfroot-libvirt"           = ["github-actions", "opentofu"]
     "tfroot-namecheap"         = ["github-actions", "opentofu"]
+    "tfroot-twilio"            = ["github-actions", "opentofu"]
     "www"                      = ["github-actions"]
   }
   dependabot_docker_directories = ["gh-cli", "tfroot-runner"]
