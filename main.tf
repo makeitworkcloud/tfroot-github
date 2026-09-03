@@ -22,6 +22,7 @@ locals {
     "tfroot-github",
     "tfroot-libvirt",
     "tfroot-namecheap",
+    "tfroot-twilio",
     "www"
   ])
   archived_github_repositories = toset([
@@ -49,10 +50,14 @@ locals {
     "tfroot-github"            = ["github-actions", "opentofu", "s3-backend", "sops", "tfstate", "terraform-provider-github"]
     "tfroot-libvirt"           = ["cloud-init", "k3s", "libvirt", "libvirt-provider", "opentofu", "s3-backend", "sops", "tfstate"]
     "tfroot-namecheap"         = ["cloudflare", "dns", "domains", "namecheap", "opentofu"]
+    "tfroot-twilio"            = ["opentofu", "s3-backend", "sms", "sops", "tfstate", "twilio"]
     "www"                      = ["cloudflare", "css", "html", "pwa", "s3", "static-site"]
   }
+  # tfroot-twilio starts with the narrow relaxed profile so its initial PR can
+  # install the OpenTofu workflow before normal required checks are enforced.
   relaxed_branch_protection_github_repositories = toset([
-    "agent-knowledge"
+    "agent-knowledge",
+    "tfroot-twilio"
   ])
   # Repositories where automation-created pull requests merge themselves once
   # required checks pass. GitHub auto-merge is enabled only for these
@@ -159,6 +164,7 @@ locals {
         "tfroot-github",
         "tfroot-libvirt",
         "tfroot-namecheap",
+        "tfroot-twilio",
       ]
     }
     "ssh_private_key" = {
