@@ -11,6 +11,7 @@ locals {
     "cflan",
     "charts",
     "agent-knowledge",
+    "channel-project",
     "kustomize-cluster",
     "images",
     "shared-workflows",
@@ -29,12 +30,14 @@ locals {
     "ansible-role-crc"
   ])
   private_github_repositories = toset([
-    "agent-knowledge"
+    "agent-knowledge",
+    "channel-project"
   ])
   topics_by_repository = {
     ".github"                  = ["community-health", "github", "org-profile"]
     "agent-knowledge"          = ["agents", "documentation", "knowledge-base", "opencode"]
     "cflan"                    = ["cloudflare", "dns", "networking", "networkmanager", "python"]
+    "channel-project"          = ["cloudflare", "dns", "opentofu", "video-streaming"]
     "charts"                   = ["ghcr", "gitops", "helm", "helm-charts", "oci"]
     "images"                   = ["buildah", "containerfiles", "custom-runners", "github-actions", "opentofu"]
     "kustomize-cluster"        = ["app-of-apps", "argocd", "gitops", "k3s", "ksops", "kustomize", "sops"]
@@ -128,22 +131,22 @@ locals {
     "cloudflare_api_token" = {
       name         = "CLOUDFLARE_API_TOKEN"
       value        = data.sops_file.secret_vars.data["cloudflare_api_token"]
-      repositories = ["www", "tfroot-namecheap"]
+      repositories = ["www", "tfroot-namecheap", "channel-project"]
     }
     "namecheap_api_key" = {
       name         = "NAMECHEAP_API_KEY"
       value        = data.sops_file.secret_vars.data["namecheap_api_key"]
-      repositories = ["tfroot-namecheap"]
+      repositories = ["tfroot-namecheap", "channel-project"]
     }
     "cloudflare_auth_client_id" = {
       name         = "CLOUDFLARE_AUTH_CLIENT_ID"
       value        = data.sops_file.secret_vars.data["cloudflare_auth_client_id"]
-      repositories = local.active_github_repositories
+      repositories = setsubtract(local.active_github_repositories, toset(["channel-project"]))
     }
     "cloudflare_auth_client_secret" = {
       name         = "CLOUDFLARE_AUTH_CLIENT_SECRET"
       value        = data.sops_file.secret_vars.data["cloudflare_auth_client_secret"]
-      repositories = local.active_github_repositories
+      repositories = setsubtract(local.active_github_repositories, toset(["channel-project"]))
     }
     "chart_updater_github_app_private_key" = {
       name  = "CHART_UPDATER_GITHUB_APP_PRIVATE_KEY"
