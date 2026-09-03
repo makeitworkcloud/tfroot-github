@@ -11,6 +11,7 @@ locals {
     "cflan",
     "charts",
     "agent-knowledge",
+    "channel-project",
     "kustomize-cluster",
     "images",
     "shared-workflows",
@@ -29,16 +30,18 @@ locals {
     "ansible-role-crc"
   ])
   private_github_repositories = toset([
-    "agent-knowledge"
+    "agent-knowledge",
+    "channel-project"
   ])
   topics_by_repository = {
     ".github"                  = ["community-health", "github", "org-profile"]
     "agent-knowledge"          = ["agents", "documentation", "knowledge-base", "opencode"]
     "cflan"                    = ["cloudflare", "dns", "networking", "networkmanager", "python"]
+    "channel-project"          = ["cloudflare", "dns", "opentofu", "video-streaming"]
     "charts"                   = ["ghcr", "gitops", "helm", "helm-charts", "oci"]
     "images"                   = ["buildah", "containerfiles", "custom-runners", "github-actions", "opentofu"]
     "kustomize-cluster"        = ["app-of-apps", "argocd", "gitops", "k3s", "ksops", "kustomize", "sops"]
-    "shared-workflows"         = ["github-actions", "github-workflows", "opentofu", "reusable-workflows", "shared-workflows"]
+    "shared-workflows"         = ["github-actions", "opentofu", "reusable-workflows", "shared-workflows"]
     "terraform-libvirt-domain" = ["cloud-init", "libvirt", "libvirt-provider", "terraform-module"]
     "tfroot-aws"               = ["aws-provider", "kms", "opentofu", "s3-backend", "sops", "tfstate"]
     "tfroot-cloudflare"        = ["cloudflare", "cloudflare-access", "cloudflare-tunnel", "opentofu", "s3-backend", "sops", "tfstate"]
@@ -97,7 +100,7 @@ locals {
     }
     "onion_secret_access_key" = {
       name         = "ONION_AWS_SECRET_ACCESS_KEY"
-      value        = data.sops_file.secret_vars.data["onion_aws_secret_access_key"]
+      value        = data.sops_file.secret_vars.data["onion_secret_access_key"]
       repositories = ["www"]
     }
     "www_s3_bucket" = {
@@ -117,7 +120,7 @@ locals {
     }
     "www_secret_access_key" = {
       name         = "AWS_SECRET_ACCESS_KEY"
-      value        = data.sops_file.secret_vars.data["www_aws_secret_access_key"]
+      value        = data.sops_file.secret_vars.data["www_secret_access_key"]
       repositories = ["www"]
     }
     "cloudflare_zone_id" = {
@@ -128,12 +131,12 @@ locals {
     "cloudflare_api_token" = {
       name         = "CLOUDFLARE_API_TOKEN"
       value        = data.sops_file.secret_vars.data["cloudflare_api_token"]
-      repositories = ["www", "tfroot-namecheap"]
+      repositories = ["www", "tfroot-namecheap", "channel-project"]
     }
     "namecheap_api_key" = {
       name         = "NAMECHEAP_API_KEY"
       value        = data.sops_file.secret_vars.data["namecheap_api_key"]
-      repositories = ["tfroot-namecheap"]
+      repositories = ["tfroot-namecheap", "channel-project"]
     }
     "cloudflare_auth_client_id" = {
       name         = "CLOUDFLARE_AUTH_CLIENT_ID"
