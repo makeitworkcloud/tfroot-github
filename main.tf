@@ -53,11 +53,10 @@ locals {
     "tfroot-twilio"            = ["opentofu", "s3-backend", "sms", "sops", "tfstate", "twilio"]
     "www"                      = ["cloudflare", "css", "html", "pwa", "s3", "static-site"]
   }
-  # tfroot-twilio starts with the narrow relaxed profile so its initial PR can
-  # install the OpenTofu workflow before normal required checks are enforced.
+  # Public repositories remain on the relaxed profile only until their initial
+  # pull request has installed the required workflow and centrally managed files.
   relaxed_branch_protection_github_repositories = toset([
-    "agent-knowledge",
-    "tfroot-twilio"
+    "agent-knowledge"
   ])
   # Repositories where automation-created pull requests merge themselves once
   # required checks pass. GitHub auto-merge is enabled only for these
@@ -85,6 +84,7 @@ locals {
     "tfroot-github"            = ["opentofu / test", "opentofu / plan"]
     "tfroot-libvirt"           = ["opentofu / test", "opentofu / plan"]
     "tfroot-namecheap"         = ["opentofu / test", "opentofu / plan"]
+    "tfroot-twilio"            = ["opentofu / test", "opentofu / plan"]
     "www"                      = ["static-checks"]
   }
   secrets = {
