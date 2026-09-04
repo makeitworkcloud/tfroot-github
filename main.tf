@@ -46,7 +46,7 @@ locals {
     "terraform-libvirt-domain" = ["cloud-init", "libvirt", "libvirt-provider", "terraform-module"]
     "tfroot-aws"               = ["aws-provider", "kms", "opentofu", "s3-backend", "sops", "tfstate"]
     "tfroot-cloudflare"        = ["cloudflare", "cloudflare-access", "cloudflare-tunnel", "opentofu", "s3-backend", "sops", "tfstate"]
-    "tfroot-gcp"               = ["gcp", "gcs-backend", "kms", "opentofu", "s3-backend", "sops", "tfstate", "workload-identity-federation"]
+    "tfroot-gcp"               = ["gcp", "gcs-backend", "kms", "opentofu", "sops", "tfstate", "workload-identity-federation"]
     "tfroot-github"            = ["github-actions", "opentofu", "s3-backend", "sops", "tfstate", "terraform-provider-github"]
     "tfroot-libvirt"           = ["cloud-init", "k3s", "libvirt", "libvirt-provider", "opentofu", "s3-backend", "sops", "tfstate"]
     "tfroot-namecheap"         = ["cloudflare", "dns", "domains", "namecheap", "opentofu"]
@@ -100,12 +100,12 @@ locals {
     }
     "onion_access_key_id" = {
       name         = "ONION_AWS_ACCESS_KEY_ID"
-      value        = data.sops_file.secret_vars.data["onion_access_key_id"]
+      value        = data.sops_file.secret_vars.data["onion_aws_access_key_id"]
       repositories = ["www"]
     }
     "onion_secret_access_key" = {
       name         = "ONION_AWS_SECRET_ACCESS_KEY"
-      value        = data.sops_file.secret_vars.data["onion_secret_access_key"]
+      value        = data.sops_file.secret_vars.data["onion_aws_secret_access_key"]
       repositories = ["www"]
     }
     "www_s3_bucket" = {
@@ -120,12 +120,12 @@ locals {
     }
     "www_access_key_id" = {
       name         = "AWS_ACCESS_KEY_ID"
-      value        = data.sops_file.secret_vars.data["www_access_key_id"]
+      value        = data.sops_file.secret_vars.data["www_aws_access_key_id"]
       repositories = ["www"]
     }
     "www_secret_access_key" = {
       name         = "AWS_SECRET_ACCESS_KEY"
-      value        = data.sops_file.secret_vars.data["www_secret_access_key"]
+      value        = data.sops_file.secret_vars.data["www_aws_secret_access_key"]
       repositories = ["www"]
     }
     "cloudflare_zone_id" = {
