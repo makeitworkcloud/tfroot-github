@@ -70,6 +70,16 @@ resource "github_repository_file" "dependabot" {
   content             = "# Managed by tfroot-github (gh-dependabot.tf); local edits are overwritten.\n${yamlencode(each.value)}"
   commit_message      = "chore: sync managed dependabot configuration"
   overwrite_on_create = true
+
+  # These attributes are creation/commit metadata, not the centrally managed
+  # file content. Ignoring imported values avoids a protected-branch write when
+  # adopting a PR-seeded file; future content changes remain managed.
+  lifecycle {
+    ignore_changes = [
+      commit_message,
+      overwrite_on_create,
+    ]
+  }
 }
 
 locals {
@@ -106,4 +116,13 @@ resource "github_repository_file" "dependabot_notify" {
   content             = local.dependabot_notify_workflow
   commit_message      = "chore: sync managed dependabot notification workflow"
   overwrite_on_create = true
+
+  # See github_repository_file.dependabot above. The workflow content remains
+  # managed; only imported creation/commit metadata is ignored.
+  lifecycle {
+    ignore_changes = [
+      commit_message,
+      overwrite_on_create,
+    ]
+  }
 }
