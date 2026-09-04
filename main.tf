@@ -46,18 +46,17 @@ locals {
     "terraform-libvirt-domain" = ["cloud-init", "libvirt", "libvirt-provider", "terraform-module"]
     "tfroot-aws"               = ["aws-provider", "kms", "opentofu", "s3-backend", "sops", "tfstate"]
     "tfroot-cloudflare"        = ["cloudflare", "cloudflare-access", "cloudflare-tunnel", "opentofu", "s3-backend", "sops", "tfstate"]
-    "tfroot-gcp"               = ["gcp", "gcs-backend", "kms", "opentofu", "sops", "tfstate", "workload-identity-federation"]
+    "tfroot-gcp"               = ["gcp", "gcs-backend", "kms", "opentofu", "s3-backend", "sops", "tfstate", "workload-identity-federation"]
     "tfroot-github"            = ["github-actions", "opentofu", "s3-backend", "sops", "tfstate", "terraform-provider-github"]
     "tfroot-libvirt"           = ["cloud-init", "k3s", "libvirt", "libvirt-provider", "opentofu", "s3-backend", "sops", "tfstate"]
     "tfroot-namecheap"         = ["cloudflare", "dns", "domains", "namecheap", "opentofu"]
     "tfroot-twilio"            = ["opentofu", "s3-backend", "sms", "sops", "tfstate", "twilio"]
     "www"                      = ["cloudflare", "css", "html", "pwa", "s3", "static-site"]
   }
-  # tfroot-twilio starts with the narrow relaxed profile so its initial PR can
-  # install the OpenTofu workflow before normal required checks are enforced.
+  # Public repositories remain on the relaxed profile only until their initial
+  # pull request has installed the required workflow and centrally managed files.
   relaxed_branch_protection_github_repositories = toset([
-    "agent-knowledge",
-    "tfroot-twilio"
+    "agent-knowledge"
   ])
   # Repositories where automation-created pull requests merge themselves once
   # required checks pass. GitHub auto-merge is enabled only for these
@@ -85,6 +84,7 @@ locals {
     "tfroot-github"            = ["opentofu / test", "opentofu / plan"]
     "tfroot-libvirt"           = ["opentofu / test", "opentofu / plan"]
     "tfroot-namecheap"         = ["opentofu / test", "opentofu / plan"]
+    "tfroot-twilio"            = ["opentofu / test", "opentofu / plan"]
     "www"                      = ["static-checks"]
   }
   secrets = {
@@ -100,12 +100,12 @@ locals {
     }
     "onion_access_key_id" = {
       name         = "ONION_AWS_ACCESS_KEY_ID"
-      value        = data.sops_file.secret_vars.data["onion_aws_access_key_id"]
+      value        = data.sops_file.secret_vars.data["onion_access_key_id"]
       repositories = ["www"]
     }
     "onion_secret_access_key" = {
       name         = "ONION_AWS_SECRET_ACCESS_KEY"
-      value        = data.sops_file.secret_vars.data["onion_aws_secret_access_key"]
+      value        = data.sops_file.secret_vars.data["onion_secret_access_key"]
       repositories = ["www"]
     }
     "www_s3_bucket" = {
@@ -120,12 +120,12 @@ locals {
     }
     "www_access_key_id" = {
       name         = "AWS_ACCESS_KEY_ID"
-      value        = data.sops_file.secret_vars.data["www_aws_access_key_id"]
+      value        = data.sops_file.secret_vars.data["www_access_key_id"]
       repositories = ["www"]
     }
     "www_secret_access_key" = {
       name         = "AWS_SECRET_ACCESS_KEY"
-      value        = data.sops_file.secret_vars.data["www_aws_secret_access_key"]
+      value        = data.sops_file.secret_vars.data["www_secret_access_key"]
       repositories = ["www"]
     }
     "cloudflare_zone_id" = {
