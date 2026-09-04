@@ -50,8 +50,8 @@ locals {
     "tfroot-github"            = ["github-actions", "opentofu", "s3-backend", "sops", "tfstate", "terraform-provider-github"]
     "tfroot-libvirt"           = ["cloud-init", "k3s", "libvirt", "libvirt-provider", "opentofu", "s3-backend", "sops", "tfstate"]
     "tfroot-namecheap"         = ["cloudflare", "dns", "domains", "namecheap", "opentofu"]
-    "tfroot-twilio"            = ["opentofu", "s3-backend", "sms", "sops", "tfstate", "twilio"]
-    "www"                      = ["cloudflare", "css", "html", "pwa", "s3", "static-site"]
+    "tfroot-twilio"            = ["opentofu", "s3-backend", "sms", "sops", "twilio"]
+    "www"                      = ["css", "html", "pwa", "s3", "static-site"]
   }
   # Public repositories remain on the relaxed profile only until their initial
   # pull request has installed the required workflow and centrally managed files.
@@ -158,6 +158,7 @@ locals {
       value = data.sops_file.secret_vars.data["chart_updater_github_app_private_key"]
       repositories = [
         "charts",
+        "kustomize-cluster",
         "tfroot-aws",
         "tfroot-cloudflare",
         "tfroot-gcp",
