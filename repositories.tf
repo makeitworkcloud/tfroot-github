@@ -141,7 +141,7 @@ locals {
     "tfroot-gcp" = {
       archived               = false
       private                = false
-      topics                 = ["gcp", "gcs-backend", "kms", "opentofu", "s3-backend", "sops", "tfstate", "workload-identity-federation"]
+      topics                 = ["gcp", "gcs-backend", "kms", "opentofu", "sops", "tfstate", "workload-identity-federation"]
       protection_profile     = "strict"
       required_status_checks = ["opentofu / test", "opentofu / plan"]
       dependabot_ecosystems  = ["github-actions", "opentofu"]
