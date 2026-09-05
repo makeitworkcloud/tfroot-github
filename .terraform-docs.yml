@@ -5,6 +5,16 @@ output:
   mode: replace
   template: |
     <!-- BEGIN_TF_DOCS -->
+    # tfroot-github
+
+    OpenTofu root for Make IT Work Cloud GitHub organization infrastructure.
+
+    ## Agent and operator contract
+
+    - This root owns centralized repository policy, protections, Dependabot callers, and distributed Actions configuration.
+    - Read [`AGENTS.md`](AGENTS.md) before changing managed paths or workflow callers; downstream edits to generated files are overwritten.
+    - Pull-request CI plans are the validation authority. `main` is an environment-gated apply path; do not run local OpenTofu or secret-decryption operations from an agent session.
+
     {{ .Content }}
 
     ## Operator guides
