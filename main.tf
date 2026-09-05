@@ -9,6 +9,7 @@ locals {
     "ansible-site-cluster",
     "ansible-role-crc",
     "cflan",
+    "hero-host-config",
     "charts",
     "agent-knowledge",
     "channel-project",
@@ -32,12 +33,14 @@ locals {
   ])
   private_github_repositories = toset([
     "agent-knowledge",
-    "channel-project"
+    "channel-project",
+    "hero-host-config"
   ])
   topics_by_repository = {
     ".github"                  = ["community-health", "github", "org-profile"]
     "agent-knowledge"          = ["agents", "documentation", "knowledge-base", "opencode"]
     "cflan"                    = ["cloudflare", "dns", "networking", "networkmanager", "python"]
+    "hero-host-config"         = ["ansible", "cloudflare-zero-trust", "configuration-management", "node-exporter", "rhel", "systemd"]
     "channel-project"          = ["cloudflare", "dns", "opentofu", "video-streaming"]
     "charts"                   = ["ghcr", "gitops", "helm", "helm-charts", "oci"]
     "images"                   = ["buildah", "containerfiles", "custom-runners", "github-actions", "opentofu"]
@@ -46,7 +49,7 @@ locals {
     "terraform-libvirt-domain" = ["cloud-init", "libvirt", "libvirt-provider", "terraform-module"]
     "tfroot-aws"               = ["aws-provider", "kms", "opentofu", "s3-backend", "sops", "tfstate"]
     "tfroot-cloudflare"        = ["cloudflare", "cloudflare-access", "cloudflare-tunnel", "opentofu", "s3-backend", "sops", "tfstate"]
-    "tfroot-gcp"               = ["gcp", "gcs-backend", "kms", "opentofu", "sops", "tfstate", "workload-identity-federation"]
+    "tfroot-gcp"               = ["gcp", "gcs-backend", "kms", "opentofu", "s3-backend", "sops", "workload-identity-federation"]
     "tfroot-github"            = ["github-actions", "opentofu", "s3-backend", "sops", "tfstate", "terraform-provider-github"]
     "tfroot-libvirt"           = ["cloud-init", "k3s", "libvirt", "libvirt-provider", "opentofu", "s3-backend", "sops", "tfstate"]
     "tfroot-namecheap"         = ["cloudflare", "dns", "domains", "namecheap", "opentofu"]
@@ -105,7 +108,7 @@ locals {
     }
     "onion_secret_access_key" = {
       name         = "ONION_AWS_SECRET_ACCESS_KEY"
-      value        = data.sops_file.secret_vars.data["onion_aws_secret_access_key"]
+      value        = data.sops_file.secret_vars.data["onion_secret_access_key"]
       repositories = ["www"]
     }
     "www_s3_bucket" = {
@@ -146,12 +149,12 @@ locals {
     "cloudflare_auth_client_id" = {
       name         = "CLOUDFLARE_AUTH_CLIENT_ID"
       value        = data.sops_file.secret_vars.data["cloudflare_auth_client_id"]
-      repositories = setsubtract(local.active_github_repositories, toset(["channel-project"]))
+      repositories = setsubtract(local.active_github_repositories, toset(["channel-project", "hero-host-config"]))
     }
     "cloudflare_auth_client_secret" = {
       name         = "CLOUDFLARE_AUTH_CLIENT_SECRET"
       value        = data.sops_file.secret_vars.data["cloudflare_auth_client_secret"]
-      repositories = setsubtract(local.active_github_repositories, toset(["channel-project"]))
+      repositories = setsubtract(local.active_github_repositories, toset(["channel-project", "hero-host-config"]))
     }
     "chart_updater_github_app_private_key" = {
       name  = "CHART_UPDATER_GITHUB_APP_PRIVATE_KEY"
