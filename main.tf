@@ -9,6 +9,7 @@ locals {
     "ansible-site-cluster",
     "ansible-role-crc",
     "cflan",
+    "hero-host-config",
     "charts",
     "agent-knowledge",
     "channel-project",
@@ -32,12 +33,14 @@ locals {
   ])
   private_github_repositories = toset([
     "agent-knowledge",
-    "channel-project"
+    "channel-project",
+    "hero-host-config"
   ])
   topics_by_repository = {
     ".github"                  = ["community-health", "github", "org-profile"]
     "agent-knowledge"          = ["agents", "documentation", "knowledge-base", "opencode"]
     "cflan"                    = ["cloudflare", "dns", "networking", "networkmanager", "python"]
+    "hero-host-config"         = ["ansible", "cloudflare-zero-trust", "configuration-management", "node-exporter", "rhel", "systemd"]
     "channel-project"          = ["cloudflare", "dns", "opentofu", "video-streaming"]
     "charts"                   = ["ghcr", "gitops", "helm", "helm-charts", "oci"]
     "images"                   = ["buildah", "containerfiles", "custom-runners", "github-actions", "opentofu"]
@@ -146,12 +149,12 @@ locals {
     "cloudflare_auth_client_id" = {
       name         = "CLOUDFLARE_AUTH_CLIENT_ID"
       value        = data.sops_file.secret_vars.data["cloudflare_auth_client_id"]
-      repositories = setsubtract(local.active_github_repositories, toset(["channel-project"]))
+      repositories = setsubtract(local.active_github_repositories, toset(["channel-project", "hero-host-config"]))
     }
     "cloudflare_auth_client_secret" = {
       name         = "CLOUDFLARE_AUTH_CLIENT_SECRET"
       value        = data.sops_file.secret_vars.data["cloudflare_auth_client_secret"]
-      repositories = setsubtract(local.active_github_repositories, toset(["channel-project"]))
+      repositories = setsubtract(local.active_github_repositories, toset(["channel-project", "hero-host-config"]))
     }
     "chart_updater_github_app_private_key" = {
       name  = "CHART_UPDATER_GITHUB_APP_PRIVATE_KEY"

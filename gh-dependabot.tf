@@ -15,6 +15,7 @@ locals {
   dependabot_ecosystems = {
     ".github"                  = ["github-actions"]
     "cflan"                    = ["github-actions", "pip"]
+    "hero-host-config"         = ["github-actions"]
     "images"                   = ["github-actions", "docker"]
     "kustomize-cluster"        = ["github-actions"]
     "shared-workflows"         = ["github-actions"]
