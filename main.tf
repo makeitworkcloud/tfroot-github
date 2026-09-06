@@ -49,11 +49,11 @@ locals {
     "terraform-libvirt-domain" = ["cloud-init", "libvirt", "libvirt-provider", "terraform-module"]
     "tfroot-aws"               = ["aws-provider", "kms", "opentofu", "s3-backend", "sops", "tfstate"]
     "tfroot-cloudflare"        = ["cloudflare", "cloudflare-access", "cloudflare-tunnel", "opentofu", "s3-backend", "sops", "tfstate"]
-    "tfroot-gcp"               = ["gcp", "gcs-backend", "kms", "opentofu", "sops", "tfstate", "workload-identity-federation"]
+    "tfroot-gcp"               = ["gcp", "gcs-backend", "kms", "opentofu", "s3-backend", "sops", "tfstate", "workload-identity-federation"]
     "tfroot-github"            = ["github-actions", "opentofu", "s3-backend", "sops", "tfstate", "terraform-provider-github"]
     "tfroot-libvirt"           = ["cloud-init", "k3s", "libvirt", "libvirt-provider", "opentofu", "s3-backend", "sops", "tfstate"]
     "tfroot-namecheap"         = ["cloudflare", "dns", "domains", "namecheap", "opentofu"]
-    "tfroot-twilio"            = ["opentofu", "s3-backend", "sms", "sops", "twilio"]
+    "tfroot-twilio"            = ["opentofu", "s3-backend", "sops", "twilio"]
     "www"                      = ["css", "html", "pwa", "s3", "static-site"]
   }
   # Public repositories remain on the relaxed profile only until their initial
@@ -155,6 +155,16 @@ locals {
       name         = "CLOUDFLARE_AUTH_CLIENT_SECRET"
       value        = data.sops_file.secret_vars.data["cloudflare_auth_client_secret"]
       repositories = setsubtract(local.active_github_repositories, toset(["channel-project", "hero-host-config"]))
+    }
+    "hero_host_config_warp_client_id" = {
+      name         = "HERO_HOST_CONFIG_WARP_CLIENT_ID"
+      value        = data.sops_file.secret_vars.data["hero_host_config_warp_client_id"]
+      repositories = ["hero-host-config"]
+    }
+    "hero_host_config_warp_client_secret" = {
+      name         = "HERO_HOST_CONFIG_WARP_CLIENT_SECRET"
+      value        = data.sops_file.secret_vars.data["hero_host_config_warp_client_secret"]
+      repositories = ["hero-host-config"]
     }
     "chart_updater_github_app_private_key" = {
       name  = "CHART_UPDATER_GITHUB_APP_PRIVATE_KEY"
