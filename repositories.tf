@@ -72,7 +72,7 @@ locals {
       topics                 = ["ghcr", "gitops", "helm", "helm-charts", "oci"]
       protection_profile     = "strict"
       required_status_checks = ["test"]
-      dependabot_ecosystems  = ["github-actions"]
+      dependabot_ecosystems  = []
       allow_auto_merge       = false
     }
     "hero-host-config" = {
@@ -144,7 +144,7 @@ locals {
       topics                 = ["gcp", "gcs-backend", "kms", "opentofu", "sops", "tfstate", "workload-identity-federation"]
       protection_profile     = "strict"
       required_status_checks = ["opentofu / test", "opentofu / plan"]
-      dependabot_ecosystems  = ["github-actions", "opentofu"]
+      dependabot_ecosystems  = []
       allow_auto_merge       = false
     }
     "tfroot-github" = {
