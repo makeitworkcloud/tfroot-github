@@ -69,6 +69,16 @@ locals {
       value        = data.sops_file.secret_vars.data["cloudflare_auth_client_secret"]
       repositories = setsubtract(local.active_github_repositories, toset(["channel-project", "hero-host-config"]))
     }
+    "hero_host_config_warp_client_id" = {
+      name         = "HERO_HOST_CONFIG_WARP_CLIENT_ID"
+      value        = data.sops_file.secret_vars.data["hero_host_config_warp_client_id"]
+      repositories = ["hero-host-config"]
+    }
+    "hero_host_config_warp_client_secret" = {
+      name         = "HERO_HOST_CONFIG_WARP_CLIENT_SECRET"
+      value        = data.sops_file.secret_vars.data["hero_host_config_warp_client_secret"]
+      repositories = ["hero-host-config"]
+    }
     "chart_updater_github_app_private_key" = {
       name  = "CHART_UPDATER_GITHUB_APP_PRIVATE_KEY"
       value = data.sops_file.secret_vars.data["chart_updater_github_app_private_key"]
