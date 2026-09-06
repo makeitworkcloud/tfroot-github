@@ -12,29 +12,13 @@
 # - Kubernetes image tags in kustomize-cluster: no Dependabot ecosystem exists
 
 locals {
-  dependabot_ecosystems = {
-    ".github"                  = ["github-actions"]
-    "cflan"                    = ["github-actions", "pip"]
-    "hero-host-config"         = ["github-actions"]
-    "images"                   = ["github-actions", "docker"]
-    "kustomize-cluster"        = ["github-actions"]
-    "shared-workflows"         = ["github-actions"]
-    "terraform-libvirt-domain" = ["github-actions", "opentofu"]
-    "tfroot-aws"               = ["github-actions", "opentofu"]
-    "tfroot-cloudflare"        = ["github-actions", "opentofu"]
-    "tfroot-github"            = ["github-actions", "opentofu"]
-    "tfroot-libvirt"           = ["github-actions", "opentofu"]
-    "tfroot-namecheap"         = ["github-actions", "opentofu"]
-    "tfroot-twilio"            = ["github-actions", "opentofu"]
-    "www"                      = ["github-actions"]
-  }
   dependabot_docker_directories = ["gh-cli", "tfroot-runner"]
 
   dependabot_configs = {
-    for repo, ecosystems in local.dependabot_ecosystems : repo => {
+    for name, repository in local.repositories : name => {
       version = 2
       updates = concat(
-        [for ecosystem in ecosystems : {
+        [for ecosystem in repository.dependabot_ecosystems : {
           package-ecosystem = ecosystem
           directory         = "/"
           schedule = {
@@ -57,9 +41,10 @@ locals {
               patterns = ["*"]
             }
           }
-        } if contains(ecosystems, "docker")]
+        } if contains(repository.dependabot_ecosystems, "docker")]
       )
     }
+    if length(repository.dependabot_ecosystems) > 0
   }
 }
 
@@ -85,28 +70,9 @@ resource "github_repository_file" "dependabot" {
 
 locals {
   # Caller for the dependabot-notify reusable workflow in shared-workflows.
-  # The reusable lives at _dependabot-notify.yml because this file's target
-  # path is managed in every repo, shared-workflows included; a reusable at
-  # the caller's path would be overwritten by this resource on every apply.
-  # Fires only when Dependabot itself opens the PR; posts a synthetic alert
-  # to the cluster Alertmanager (see AGENTS.md, "Dependabot PR Alerting").
-  dependabot_notify_workflow = <<-EOT
-    ---
-    # Managed by tfroot-github (gh-dependabot.tf); local edits are overwritten.
-    name: dependabot-notify
-
-    on:
-      pull_request:
-        types: [opened, reopened]
-
-    permissions: {}
-
-    jobs:
-      notify:
-        if: github.actor == 'dependabot[bot]'
-        uses: makeitworkcloud/shared-workflows/.github/workflows/_dependabot-notify.yml@main
-        secrets: inherit
-  EOT
+  # It is named _dependabot-notify.yml there because this root owns the caller
+  # path in every repository, including shared-workflows itself.
+  dependabot_notify_workflow = templatefile("${path.module}/templates/dependabot-notify.yml.tftpl", {})
 }
 
 resource "github_repository_file" "dependabot_notify" {
