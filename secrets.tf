@@ -41,7 +41,7 @@ locals {
     }
     "www_secret_access_key" = {
       name         = "AWS_SECRET_ACCESS_KEY"
-      value        = data.sops_file.secret_vars.data["www_secret_access_key"]
+      value        = data.sops_file.secret_vars.data["www_aws_secret_access_key"]
       repositories = ["www"]
     }
     "cloudflare_zone_id" = {
