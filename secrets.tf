@@ -79,6 +79,16 @@ locals {
       value        = data.sops_file.secret_vars.data["hero_host_config_warp_client_secret"]
       repositories = ["hero-host-config"]
     }
+    "hero_host_config_ssh_private_key" = {
+      name         = "HERO_HOST_CONFIG_SSH_PRIVATE_KEY"
+      value        = data.sops_file.secret_vars.data["ssh_private_key"]
+      repositories = ["hero-host-config"]
+    }
+    "hero_host_config_ssh_known_hosts" = {
+      name         = "HERO_HOST_CONFIG_SSH_KNOWN_HOSTS"
+      value        = data.sops_file.secret_vars.data["ssh_known_hosts"]
+      repositories = ["hero-host-config"]
+    }
     "chart_updater_github_app_private_key" = {
       name  = "CHART_UPDATER_GITHUB_APP_PRIVATE_KEY"
       value = data.sops_file.secret_vars.data["chart_updater_github_app_private_key"]
