@@ -21,7 +21,7 @@ locals {
     }
     "onion_secret_access_key" = {
       name         = "ONION_AWS_SECRET_ACCESS_KEY"
-      value        = data.sops_file.secret_vars.data["onion_secret_access_key"]
+      value        = data.sops_file.secret_vars.data["onion_aws_secret_access_key"]
       repositories = ["www"]
     }
     "www_s3_bucket" = {
