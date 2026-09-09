@@ -21,7 +21,7 @@ locals {
     }
     "onion_secret_access_key" = {
       name         = "ONION_AWS_SECRET_ACCESS_KEY"
-      value        = data.sops_file.secret_vars.data["onion_aws_secret_access_key"]
+      value        = data.sops_file.secret_vars.data["onion_secret_access_key"]
       repositories = ["www"]
     }
     "www_s3_bucket" = {
@@ -77,6 +77,16 @@ locals {
     "hero_host_config_warp_client_secret" = {
       name         = "HERO_HOST_CONFIG_WARP_CLIENT_SECRET"
       value        = data.sops_file.secret_vars.data["hero_host_config_warp_client_secret"]
+      repositories = ["hero-host-config"]
+    }
+    "hero_host_config_ssh_private_key" = {
+      name         = "HERO_HOST_CONFIG_SSH_PRIVATE_KEY"
+      value        = data.sops_file.secret_vars.data["ssh_private_key"]
+      repositories = ["hero-host-config"]
+    }
+    "hero_host_config_ssh_known_hosts" = {
+      name         = "HERO_HOST_CONFIG_SSH_KNOWN_HOSTS"
+      value        = data.sops_file.secret_vars.data["ssh_known_hosts"]
       repositories = ["hero-host-config"]
     }
     "chart_updater_github_app_private_key" = {
