@@ -1,0 +1,65 @@
+name: check-known-host-source
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      hero_host:
+        description: Approved SSH destination to match against the canonical source.
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  synthetic-tests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.14"
+      - name: Test source diagnostic with synthetic material
+        run: python tests/test-known-host-source.py
+
+  check-source:
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
+    needs: synthetic-tests
+    runs-on: arc-tf
+    environment: production
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      id-token: write
+    concurrency:
+      group: check-known-host-source
+      cancel-in-progress: false
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Configure existing AWS SOPS KMS access
+        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c
+        with:
+          role-to-assume: arn:aws:iam::332355796717:role/github-actions-sops-kms
+          aws-region: us-west-2
+          role-duration-seconds: 900
+          unset-current-credentials: true
+      - name: Match canonical known-host source without value output
+        timeout-minutes: 1
+        env:
+          HERO_HOST: ${{ inputs.hero_host }}
+        run: python3 scripts/check-known-host-source.py
+      - name: Remove diagnostic temporary material
+        if: always()
+        shell: bash
+        run: rm -rf -- "$RUNNER_TEMP/known-host-source-check-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
