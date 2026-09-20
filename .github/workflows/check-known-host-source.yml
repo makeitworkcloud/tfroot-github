@@ -62,4 +62,4 @@ jobs:
       - name: Remove diagnostic temporary material
         if: always()
         shell: bash
-        run: rm -rf -- "$RUNNER_TEMP/known-host-source-check"
+        run: rm -rf -- "$RUNNER_TEMP/known-host-source-check-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"

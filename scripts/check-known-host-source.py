@@ -21,7 +21,9 @@ def check(host, directory):
     except OSError:
         return "tool-error"
     try:
-        source = subprocess.run(SOURCE_COMMAND, capture_output=True, timeout=30)
+        source = subprocess.run(
+            SOURCE_COMMAND, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, timeout=30
+        )
         if source.returncode != 0:
             return "source-extraction-failed"
         if not source.stdout or len(source.stdout) > MAX_BYTES:
@@ -41,12 +43,18 @@ def check(host, directory):
     except (OSError, subprocess.TimeoutExpired):
         return "tool-error"
     finally:
-        os.rmdir(directory)
+        try:
+            os.rmdir(directory)
+        except OSError:
+            pass
 
 
 def main():
     try:
-        directory = Path(os.environ["RUNNER_TEMP"]) / "known-host-source-check"
+        directory = Path(os.environ["RUNNER_TEMP"]) / (
+            f"known-host-source-check-{os.environ['GITHUB_RUN_ID']}-"
+            f"{os.environ['GITHUB_RUN_ATTEMPT']}"
+        )
         status = check(os.environ.get("HERO_HOST", ""), directory)
     except Exception:
         status = "tool-error"

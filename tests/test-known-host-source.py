@@ -20,7 +20,7 @@ class SourceCheckTests(unittest.TestCase):
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)
         self.root = Path(temporary.name)
-        self.directory = self.root / "known-host-source-check"
+        self.directory = self.root / "known-host-source-check-123-1"
         key = self.root / "fixture"
         result = REAL_RUN(["ssh-keygen", "-q", "-t", "ed25519", "-N", "", "-C", "fixture", "-f", str(key)],
                           capture_output=True, timeout=10)
@@ -35,7 +35,9 @@ class SourceCheckTests(unittest.TestCase):
             if args[0] == "sops":
                 self.assertTrue(args == ["sops", "--decrypt", "--extract", '["ssh_known_hosts"]', "secrets/secrets.yaml"],
                                 "wrong source extraction")
-                self.assertTrue(kwargs.get("capture_output") and kwargs.get("timeout") == 30, "unsafe extraction")
+                self.assertTrue(kwargs.get("stdout") == subprocess.PIPE and kwargs.get("stderr") == subprocess.DEVNULL,
+                                "unsafe extraction output")
+                self.assertTrue("capture_output" not in kwargs and kwargs.get("timeout") == 30, "unsafe extraction")
                 return subprocess.CompletedProcess(args, extraction_code, stdout=source, stderr=b"sensitive-sentinel")
             self.assertTrue(args[:3] == ["ssh-keygen", "-F", "example.test"], "unexpected command")
             self.assertTrue(kwargs.get("stdout") == subprocess.DEVNULL and kwargs.get("stderr") == subprocess.DEVNULL,
@@ -50,7 +52,8 @@ class SourceCheckTests(unittest.TestCase):
             return REAL_RUN(args, **kwargs)
 
         stdout, stderr = io.StringIO(), io.StringIO()
-        with mock.patch.dict(os.environ, {"RUNNER_TEMP": str(self.root), "HERO_HOST": "example.test"}):
+        with mock.patch.dict(os.environ, {"RUNNER_TEMP": str(self.root), "GITHUB_RUN_ID": "123",
+                                           "GITHUB_RUN_ATTEMPT": "1", "HERO_HOST": "example.test"}):
             with mock.patch.object(CHECK.subprocess, "run", side_effect=run):
                 with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
                     code = CHECK.main()
@@ -94,6 +97,18 @@ class SourceCheckTests(unittest.TestCase):
             self.assertTrue(CHECK.check(host, self.directory) == "invalid-input", "invalid target accepted")
             self.assertTrue(not self.directory.exists(), "unexpected temporary directory")
 
+    def test_invalid_input_main_output_and_exit(self):
+        for host in ("", "-F", "bad host", "bad\nhost"):
+            stdout, stderr = io.StringIO(), io.StringIO()
+            with mock.patch.dict(os.environ, {"RUNNER_TEMP": str(self.root), "GITHUB_RUN_ID": "123",
+                                               "GITHUB_RUN_ATTEMPT": "1", "HERO_HOST": host}):
+                with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                    code = CHECK.main()
+            self.assertTrue(code == 1, "invalid input returned success")
+            self.assertTrue(stdout.getvalue() == "source_known_hosts: status=invalid-input\n", "invalid output changed")
+            self.assertTrue(stderr.getvalue() == "", "invalid input disclosed stderr")
+            self.assertTrue(not self.directory.exists(), "invalid input created temporary directory")
+
     def test_existing_directory_not_touched(self):
         self.directory.mkdir()
         sentinel = self.directory / "sentinel"
@@ -105,6 +120,42 @@ class SourceCheckTests(unittest.TestCase):
         with mock.patch.object(CHECK.subprocess, "run", side_effect=subprocess.TimeoutExpired(["sops"], 30)):
             self.assertTrue(CHECK.check("example.test", self.directory) == "tool-error", "extraction timeout misclassified")
         self.assertTrue(not self.directory.exists(), "temporary directory remains")
+
+    def test_cleanup_failure_is_safe(self):
+        stdout, stderr = io.StringIO(), io.StringIO()
+        with mock.patch.dict(os.environ, {"RUNNER_TEMP": str(self.root), "GITHUB_RUN_ID": "123",
+                                           "GITHUB_RUN_ATTEMPT": "1", "HERO_HOST": "example.test"}):
+            with mock.patch.object(CHECK.subprocess, "run", side_effect=[
+                subprocess.CompletedProcess(CHECK.SOURCE_COMMAND, 0, stdout=self.value, stderr=b"sensitive-sentinel"),
+                subprocess.CompletedProcess(["ssh-keygen"], 0),
+            ]):
+                with mock.patch.object(CHECK.os, "rmdir", side_effect=OSError("sensitive-sentinel")):
+                    with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                        code = CHECK.main()
+        self.assertTrue(code == 0, "cleanup failure changed result")
+        self.assertTrue(stdout.getvalue() == "source_known_hosts: status=match-found\n", "cleanup failure disclosed output")
+        self.assertTrue(stderr.getvalue() == "", "cleanup failure disclosed stderr")
+        self.assertTrue(self.directory.exists(), "cleanup failure unexpectedly removed directory")
+        self.directory.rmdir()
+
+    def test_workflow_guardrails(self):
+        workflow = (ROOT / ".github/workflows/check-known-host-source.yml").read_text()
+        synthetic = workflow.split("  check-source:", 1)[0]
+        source = workflow.split("  check-source:", 1)[1]
+        self.assertTrue("if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'" in source,
+                        "source job is not manual main-only")
+        self.assertTrue("needs: synthetic-tests" in source, "source job bypasses synthetic tests")
+        self.assertTrue("environment: production" in source and "id-token: write" in source,
+                        "source job lost production/OIDC gate")
+        for forbidden in ("credentials", "production", "id-token", "secrets."):
+            self.assertTrue(forbidden not in synthetic, "synthetic job contains production material")
+        self.assertTrue("tofu" not in workflow.lower() and "make " not in workflow.lower() and "apply" not in workflow.lower(),
+                        "workflow contains infrastructure commands")
+        for line in workflow.splitlines():
+            if "uses:" in line:
+                self.assertTrue(line.strip().rsplit("@", 1)[-1].isalnum() and
+                                len(line.strip().rsplit("@", 1)[-1]) == 40,
+                                "workflow action is not pinned")
 
 
 if __name__ == "__main__":

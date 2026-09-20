@@ -14,7 +14,7 @@ After a separately approved merge, use a new manual `check-known-host-source` di
 
 ## Output contract
 
-The helper extracts the canonical `ssh_known_hosts` field from `secrets/secrets.yaml` inside CI, suppressing SOPS stdout/stderr from logs. A temporary file is held under `$RUNNER_TEMP/known-host-source-check`, directory mode 0700 and file mode 0600. OpenSSH matching output is discarded. Normal success/failure removes the temporary file and directory; an always-run workflow step provides cleanup after interruption. No artifacts or caches contain the extracted material.
+The helper extracts the canonical `ssh_known_hosts` field from `secrets/secrets.yaml` inside CI, suppressing SOPS stdout/stderr from logs. A run-scoped temporary directory is held under `$RUNNER_TEMP/known-host-source-check-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}`, with directory mode 0700 and file mode 0600. OpenSSH matching output is discarded. Normal success/failure removes the temporary file and directory; an always-run workflow step provides best-effort cleanup after interruption, but cleanup is not guaranteed after a host crash. No artifacts or caches contain the extracted material.
 
 Only `source_known_hosts: status=...` is emitted:
 
