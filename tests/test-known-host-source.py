@@ -49,6 +49,10 @@ class SourceCheckTests(unittest.TestCase):
 
         def popen(args, **kwargs):
             if args == CHECK.SOURCE_COMMAND:
+                self.assertTrue(args == ["sops", "--decrypt", "--extract", '["ssh_known_hosts"]', "secrets/secrets.yaml"],
+                                "wrong source extraction")
+                self.assertTrue(kwargs.get("stdout") == subprocess.PIPE and kwargs.get("stderr") == subprocess.DEVNULL,
+                                "unsafe extraction output")
                 process = REAL_POPEN(self.producer(mode, exit_code), **kwargs)
                 if processes is not None:
                     processes.append(process)
@@ -78,7 +82,11 @@ class SourceCheckTests(unittest.TestCase):
         with mock.patch.dict(os.environ, {"RUNNER_TEMP": str(self.root), "GITHUB_RUN_ID": "123",
                                            "GITHUB_RUN_ATTEMPT": "1", "HERO_HOST": "example.test"}):
             with mock.patch.object(CHECK.subprocess, "Popen",
-                                   side_effect=self.source_popen(source, exit_code=extraction_code)):
+                                   side_effect=self.source_popen(
+                                       source,
+                                       mode="exit" if extraction_code else "chunks",
+                                       exit_code=extraction_code,
+                                   )):
                 with mock.patch.object(CHECK.subprocess, "run", side_effect=run):
                     with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
                         code = CHECK.main()
