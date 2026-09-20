@@ -26,6 +26,32 @@ old AWS Secrets Manager copy is legacy and unreferenced. It is not part of
 normal key rotation or recovery. Deleting that legacy copy requires a separate
 approved cleanup after the agreed rollback window.
 
+### Proposed consumer: terraform-libvirt-domain module releases
+
+`makeitworkcloud/terraform-libvirt-domain` is a proposed additional consumer of
+the same App for module release automation. Its release workflow mints an
+installation token from the canonical Actions secret and App ID, requesting
+`owner: makeitworkcloud`, `repositories: terraform-libvirt-domain`, Contents
+write, and Pull requests write only. Two owner gates apply before rollout is
+complete:
+
+- An organization owner must add the repository to the App's organization
+  installation using **Only select repositories**. That installation is not yet
+  confirmed; until an owner confirms it, the consumer workflow cannot mint a
+  token and the change must not be treated as rolled out.
+- The reviewed plan/apply must distribute the existing Actions secret to the
+  new source repository by adding it to the chart updater secret's
+  `repositories` recipient list. This broadens private-key distribution and
+  follows the approval path above.
+
+The workflow's `repositories` input scopes only the installation token it
+mints. It does not scope the shared private key: any repository holding the
+Actions secret can request tokens for every repository selected in the App
+installation, limited only by the App's existing Contents and Pull requests
+permissions. This proposal adds a recipient and a token request only; it does
+not change App permissions, create another App, or move the manually owned
+installation into Terraform.
+
 ## Ownership boundaries
 
 | Concern | Owner and source of truth |
