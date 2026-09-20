@@ -3,6 +3,7 @@ import importlib.util
 import io
 import os
 import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -12,6 +13,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SPEC = importlib.util.spec_from_file_location("source_check", ROOT / "scripts/check-known-host-source.py")
 CHECK = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(CHECK)
+REAL_POPEN = subprocess.Popen
 REAL_RUN = subprocess.run
 
 
@@ -26,19 +28,39 @@ class SourceCheckTests(unittest.TestCase):
                           capture_output=True, timeout=10)
         self.assertTrue(result.returncode == 0, "fixture generation failed")
         self.value = b"example.test " + key.with_suffix(".pub").read_bytes()
+        self.source_file = self.root / "synthetic-source"
+
+    def producer(self, mode, exit_code=0):
+        if mode == "chunks":
+            code = "import pathlib,sys; data=pathlib.Path(sys.argv[1]).read_bytes(); [sys.stdout.buffer.write(data[i:i+8192]) or sys.stdout.buffer.flush() for i in range(0,len(data),8192)]"
+            return [sys.executable, "-c", code, str(self.source_file)]
+        if mode == "oversize":
+            code = "import os; chunk=b'x'*65536\nwhile True: os.write(1,chunk)"
+            return [sys.executable, "-c", code]
+        if mode == "sleep":
+            code = "import time; time.sleep(2)"
+            return [sys.executable, "-c", code]
+        code = "import sys; sys.exit(int(sys.argv[1]))"
+        return [sys.executable, "-c", code, str(exit_code)]
+
+    def source_popen(self, source, mode="chunks", exit_code=0, processes=None):
+        self.source_file.write_bytes(source)
+
+        def popen(args, **kwargs):
+            if args == CHECK.SOURCE_COMMAND:
+                process = REAL_POPEN(self.producer(mode, exit_code), **kwargs)
+                if processes is not None:
+                    processes.append(process)
+                return process
+            return REAL_POPEN(args, **kwargs)
+
+        return popen
 
     def run_check(self, value=None, extraction_code=0, parse_error=None):
         source = self.value if value is None else value
         before = set(self.root.iterdir())
 
         def run(args, **kwargs):
-            if args[0] == "sops":
-                self.assertTrue(args == ["sops", "--decrypt", "--extract", '["ssh_known_hosts"]', "secrets/secrets.yaml"],
-                                "wrong source extraction")
-                self.assertTrue(kwargs.get("stdout") == subprocess.PIPE and kwargs.get("stderr") == subprocess.DEVNULL,
-                                "unsafe extraction output")
-                self.assertTrue("capture_output" not in kwargs and kwargs.get("timeout") == 30, "unsafe extraction")
-                return subprocess.CompletedProcess(args, extraction_code, stdout=source, stderr=b"sensitive-sentinel")
             self.assertTrue(args[:3] == ["ssh-keygen", "-F", "example.test"], "unexpected command")
             self.assertTrue(kwargs.get("stdout") == subprocess.DEVNULL and kwargs.get("stderr") == subprocess.DEVNULL,
                             "probe output not suppressed")
@@ -54,9 +76,11 @@ class SourceCheckTests(unittest.TestCase):
         stdout, stderr = io.StringIO(), io.StringIO()
         with mock.patch.dict(os.environ, {"RUNNER_TEMP": str(self.root), "GITHUB_RUN_ID": "123",
                                            "GITHUB_RUN_ATTEMPT": "1", "HERO_HOST": "example.test"}):
-            with mock.patch.object(CHECK.subprocess, "run", side_effect=run):
-                with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
-                    code = CHECK.main()
+            with mock.patch.object(CHECK.subprocess, "Popen",
+                                   side_effect=self.source_popen(source, exit_code=extraction_code)):
+                with mock.patch.object(CHECK.subprocess, "run", side_effect=run):
+                    with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                        code = CHECK.main()
         output = stdout.getvalue()
         statuses = ("match-found", "missing-host-entry", "source-extraction-failed", "source-unusable", "tool-error")
         self.assertTrue(output in {f"source_known_hosts: status={status}\n" for status in statuses}, "unexpected output")
@@ -85,8 +109,15 @@ class SourceCheckTests(unittest.TestCase):
         self.assertTrue(self.run_check(extraction_code=1) == "source-extraction-failed", "extraction error misclassified")
 
     def test_empty_and_oversized(self):
-        for value in (b"", b"x" * (CHECK.MAX_BYTES + 1)):
-            self.assertTrue(self.run_check(value) == "source-unusable", "invalid size accepted")
+        self.assertTrue(self.run_check(b"") == "source-unusable", "empty source accepted")
+        processes = []
+        before = set(self.root.iterdir())
+        with mock.patch.object(CHECK.subprocess, "Popen",
+                               side_effect=self.source_popen(b"", mode="oversize", processes=processes)):
+            status = CHECK.check("example.test", self.directory)
+        self.assertTrue(status == "source-unusable", "oversized source accepted")
+        self.assertTrue(processes and processes[0].poll() is not None, "oversized source child remains running")
+        self.assertTrue(set(self.root.iterdir()) == before, "temporary plaintext residue")
 
     def test_probe_failure_cleanup(self):
         for error in (FileNotFoundError("sensitive-sentinel"), subprocess.TimeoutExpired(["ssh-keygen"], 5)):
@@ -116,22 +147,27 @@ class SourceCheckTests(unittest.TestCase):
         self.assertTrue(CHECK.check("example.test", self.directory) == "tool-error", "existing path accepted")
         self.assertTrue(sentinel.read_text() == "untouched", "existing path modified")
 
-    def test_sops_timeout_cleanup(self):
-        with mock.patch.object(CHECK.subprocess, "run", side_effect=subprocess.TimeoutExpired(["sops"], 30)):
-            self.assertTrue(CHECK.check("example.test", self.directory) == "tool-error", "extraction timeout misclassified")
+    def test_source_timeout_cleanup(self):
+        processes = []
+        with mock.patch.object(CHECK, "SOURCE_TIMEOUT", 0.05):
+            with mock.patch.object(CHECK.subprocess, "Popen",
+                                   side_effect=self.source_popen(b"", mode="sleep", processes=processes)):
+                status = CHECK.check("example.test", self.directory)
+        self.assertTrue(status == "tool-error", "source timeout misclassified")
+        self.assertTrue(processes and processes[0].poll() is not None, "timed-out source child remains running")
         self.assertTrue(not self.directory.exists(), "temporary directory remains")
 
     def test_cleanup_failure_is_safe(self):
+        processes = []
         stdout, stderr = io.StringIO(), io.StringIO()
         with mock.patch.dict(os.environ, {"RUNNER_TEMP": str(self.root), "GITHUB_RUN_ID": "123",
                                            "GITHUB_RUN_ATTEMPT": "1", "HERO_HOST": "example.test"}):
-            with mock.patch.object(CHECK.subprocess, "run", side_effect=[
-                subprocess.CompletedProcess(CHECK.SOURCE_COMMAND, 0, stdout=self.value, stderr=b"sensitive-sentinel"),
-                subprocess.CompletedProcess(["ssh-keygen"], 0),
-            ]):
-                with mock.patch.object(CHECK.os, "rmdir", side_effect=OSError("sensitive-sentinel")):
-                    with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
-                        code = CHECK.main()
+            with mock.patch.object(CHECK.subprocess, "Popen",
+                                   side_effect=self.source_popen(self.value, processes=processes)):
+                with mock.patch.object(CHECK.subprocess, "run", side_effect=lambda args, **kwargs: REAL_RUN(args, **kwargs)):
+                    with mock.patch.object(CHECK.os, "rmdir", side_effect=OSError("sensitive-sentinel")):
+                        with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                            code = CHECK.main()
         self.assertTrue(code == 0, "cleanup failure changed result")
         self.assertTrue(stdout.getvalue() == "source_known_hosts: status=match-found\n", "cleanup failure disclosed output")
         self.assertTrue(stderr.getvalue() == "", "cleanup failure disclosed stderr")

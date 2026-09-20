@@ -1,14 +1,92 @@
 #!/usr/bin/env python3
 
 import os
+import selectors
 import subprocess
 import sys
 import tempfile
+import time
 from pathlib import Path
 
 
 SOURCE_COMMAND = ["sops", "--decrypt", "--extract", '["ssh_known_hosts"]', "secrets/secrets.yaml"]
 MAX_BYTES = 1024 * 1024
+SOURCE_TIMEOUT = 30
+SOURCE_CLEANUP_TIMEOUT = 1
+
+
+def _stop_source(process):
+    if process is None:
+        return
+    try:
+        if process.poll() is None:
+            process.kill()
+    except OSError:
+        pass
+    try:
+        process.wait(timeout=SOURCE_CLEANUP_TIMEOUT)
+    except (OSError, subprocess.TimeoutExpired):
+        try:
+            process.kill()
+        except OSError:
+            pass
+        try:
+            process.wait(timeout=SOURCE_CLEANUP_TIMEOUT)
+        except (OSError, subprocess.TimeoutExpired):
+            pass
+    for stream in (getattr(process, "stdout", None), getattr(process, "stderr", None)):
+        if stream is not None:
+            try:
+                stream.close()
+            except OSError:
+                pass
+
+
+def _extract_source():
+    process = None
+    selector = None
+    source = bytearray()
+    stream_closed = False
+    try:
+        process = subprocess.Popen(
+            SOURCE_COMMAND, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL
+        )
+        selector = selectors.DefaultSelector()
+        selector.register(process.stdout, selectors.EVENT_READ)
+        deadline = time.monotonic() + SOURCE_TIMEOUT
+        while not stream_closed:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                return None, "tool-error"
+            if not selector.select(remaining):
+                return None, "tool-error"
+            remaining_bytes = MAX_BYTES + 1 - len(source)
+            chunk = os.read(process.stdout.fileno(), remaining_bytes)
+            if not chunk:
+                stream_closed = True
+                continue
+            source.extend(chunk)
+            if len(source) > MAX_BYTES:
+                return None, "source-unusable"
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            return None, "tool-error"
+        try:
+            return_code = process.wait(timeout=remaining)
+        except subprocess.TimeoutExpired:
+            return None, "tool-error"
+        if return_code != 0:
+            return None, "source-extraction-failed"
+        return bytes(source), None
+    except (OSError, subprocess.TimeoutExpired):
+        return None, "tool-error"
+    finally:
+        if selector is not None:
+            try:
+                selector.close()
+            except OSError:
+                pass
+        _stop_source(process)
 
 
 def check(host, directory):
@@ -21,15 +99,13 @@ def check(host, directory):
     except OSError:
         return "tool-error"
     try:
-        source = subprocess.run(
-            SOURCE_COMMAND, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, timeout=30
-        )
-        if source.returncode != 0:
-            return "source-extraction-failed"
-        if not source.stdout or len(source.stdout) > MAX_BYTES:
+        source, error = _extract_source()
+        if error:
+            return error
+        if not source:
             return "source-unusable"
         with tempfile.NamedTemporaryFile(dir=directory) as known_hosts:
-            known_hosts.write(source.stdout)
+            known_hosts.write(source)
             known_hosts.flush()
             matched = subprocess.run(
                 ["ssh-keygen", "-F", host, "-f", known_hosts.name],

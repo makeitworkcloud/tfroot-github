@@ -14,7 +14,7 @@ After a separately approved merge, use a new manual `check-known-host-source` di
 
 ## Output contract
 
-The helper extracts the canonical `ssh_known_hosts` field from `secrets/secrets.yaml` inside CI, suppressing SOPS stdout/stderr from logs. A run-scoped temporary directory is held under `$RUNNER_TEMP/known-host-source-check-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}`, with directory mode 0700 and file mode 0600. OpenSSH matching output is discarded. Normal success/failure removes the temporary file and directory; an always-run workflow step provides best-effort cleanup after interruption, but cleanup is not guaranteed after a host crash. No artifacts or caches contain the extracted material.
+The helper extracts the canonical `ssh_known_hosts` field from `secrets/secrets.yaml` inside CI without buffering unbounded SOPS stdout. It reads stdout incrementally with a selector and `os.read`, allowing at most `MAX_BYTES + 1` bytes in memory so an oversize result is detected and terminated. A run-scoped temporary directory is held under `$RUNNER_TEMP/known-host-source-check-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}`, with directory mode 0700 and file mode 0600. OpenSSH matching output is discarded. Normal success/failure removes the temporary file and directory; an always-run workflow step provides best-effort cleanup after interruption, but cleanup is not guaranteed after a host crash. No artifacts or caches contain the extracted material.
 
 Only `source_known_hosts: status=...` is emitted:
 
@@ -25,7 +25,7 @@ Only `source_known_hosts: status=...` is emitted:
 - `invalid-input`: empty, dash-prefixed, whitespace/control-bearing target.
 - `tool-error`: unavailable tool, timeout, temporary-file error or unexpected failure.
 
-Extraction is bounded to 30 seconds; the match probe to five seconds; the whole step to one minute. The byte limit is checked after capture, not a streaming memory bound. The workflow prints no key material, source contents, fingerprints, hashes, or tool exception details. GitHub may display the non-secret dispatch destination in step environment metadata.
+Extraction is bounded to 30 seconds; the match probe to five seconds; the whole step to one minute. On timeout or oversize, the child is killed and waited for with a bounded cleanup timeout. The workflow prints no key material, source contents, fingerprints, hashes, or tool exception details. GitHub may display the non-secret dispatch destination in step environment metadata.
 
 ## Interpretation
 
