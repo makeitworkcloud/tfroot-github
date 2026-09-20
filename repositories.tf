@@ -174,15 +174,6 @@ locals {
       dependabot_ecosystems  = ["github-actions", "opentofu"]
       allow_auto_merge       = false
     }
-    "tfroot-twilio" = {
-      archived               = false
-      private                = false
-      topics                 = ["opentofu", "s3-backend", "sms", "sops", "twilio"]
-      protection_profile     = "strict"
-      required_status_checks = ["opentofu / test", "opentofu / plan"]
-      dependabot_ecosystems  = ["github-actions", "opentofu"]
-      allow_auto_merge       = false
-    }
     "www" = {
       archived               = false
       private                = false

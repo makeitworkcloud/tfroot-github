@@ -101,7 +101,6 @@ locals {
         "tfroot-github",
         "tfroot-libvirt",
         "tfroot-namecheap",
-        "tfroot-twilio",
       ]
     }
     "ssh_private_key" = {
