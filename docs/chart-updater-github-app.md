@@ -29,16 +29,17 @@ approved cleanup after the agreed rollback window.
 ### Proposed consumer: terraform-libvirt-domain module releases
 
 `makeitworkcloud/terraform-libvirt-domain` is a proposed additional consumer of
-the same App for module release automation. Its release workflow mints an
-installation token from the canonical Actions secret and App ID, requesting
-`owner: makeitworkcloud`, `repositories: terraform-libvirt-domain`, Contents
-write, and Pull requests write only. Two owner gates apply before rollout is
-complete:
+the same App for module release automation. Its proposed release workflow will
+mint an installation token from the canonical Actions secret and App ID,
+requesting `owner: makeitworkcloud`, `repositories: terraform-libvirt-domain`,
+Contents write, and Pull requests write only. Two owner gates apply before
+rollout is complete:
 
-- An organization owner must add the repository to the App's organization
-  installation using **Only select repositories**. That installation is not yet
-  confirmed; until an owner confirms it, the consumer workflow cannot mint a
-  token and the change must not be treated as rolled out.
+- An organization owner must verify the App's organization installation and
+  ensure it selects the repository using **Only select repositories**. The
+  installation scope is currently unverified; rollout stays blocked until an
+  owner confirms it, and token minting will fail if the repository is not
+  selected.
 - The reviewed plan/apply must distribute the existing Actions secret to the
   new source repository by adding it to the chart updater secret's
   `repositories` recipient list. This broadens private-key distribution and
