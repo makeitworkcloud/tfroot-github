@@ -29,10 +29,11 @@ class SourceCheckTests(unittest.TestCase):
         self.assertTrue(result.returncode == 0, "fixture generation failed")
         self.value = b"example.test " + key.with_suffix(".pub").read_bytes()
         self.source_file = self.root / "synthetic-source"
+        self.source_file.write_bytes(b"")
 
     def producer(self, mode, exit_code=0):
         if mode == "chunks":
-            code = "import pathlib,sys; data=pathlib.Path(sys.argv[1]).read_bytes(); [sys.stdout.buffer.write(data[i:i+8192]) or sys.stdout.buffer.flush() for i in range(0,len(data),8192)]"
+            code = "import pathlib,sys; data=pathlib.Path(sys.argv[1]).read_bytes();\nfor i in range(0,len(data),8192): sys.stdout.buffer.write(data[i:i+8192]); sys.stdout.buffer.flush()"
             return [sys.executable, "-c", code, str(self.source_file)]
         if mode == "oversize":
             code = "import os; chunk=b'x'*65536\nwhile True: os.write(1,chunk)"
