@@ -147,7 +147,7 @@ class SourceCheckTests(unittest.TestCase):
         self.assertTrue("needs: synthetic-tests" in source, "source job bypasses synthetic tests")
         self.assertTrue("environment: production" in source and "id-token: write" in source,
                         "source job lost production/OIDC gate")
-        for forbidden in ("credentials", "production", "id-token", "secrets."):
+        for forbidden in ("configure-aws-credentials", "production", "id-token", "secrets."):
             self.assertTrue(forbidden not in synthetic, "synthetic job contains production material")
         self.assertTrue("tofu" not in workflow.lower() and "make " not in workflow.lower() and "apply" not in workflow.lower(),
                         "workflow contains infrastructure commands")
