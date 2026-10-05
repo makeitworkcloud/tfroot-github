@@ -95,6 +95,7 @@ locals {
       repositories = [
         "charts",
         "kustomize-cluster",
+        "terraform-libvirt-domain",
         "tfroot-aws",
         "tfroot-cloudflare",
         "tfroot-gcp",
