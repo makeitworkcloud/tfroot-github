@@ -6,4 +6,4 @@ This root centrally manages organization policy, repository protections, Dependa
 
 `README.md` is generated from `.terraform-docs.yml`; regenerate it instead of editing generated sections by hand. Use `docs/chart-updater-github-app.md` for chart updater GitHub App, installation, and key operations.
 
-Use PR CI plans as validation authority. `main` is an environment-gated apply path; use scoped branches and PRs, never direct pushes. Do not use secret decryption, import, state, or apply operations as validation. Never expose encrypted secret content, credentials, state, or sensitive plans.
+Use PR CI plans as validation authority. `main` is an environment-gated apply path; use scoped branches and PRs, never direct pushes. Do not decrypt secrets or run import, state, or apply operations directly from an agent session. Never expose encrypted secret content, credentials, state, or sensitive plans.
